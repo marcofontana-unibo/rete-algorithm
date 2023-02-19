@@ -2,24 +2,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
-    private final String type;            //"alpha","beta","gamma","terminal","root" a seconda del tipo di nodo
-    private List<Object> value;           //contenuto del nodo, se "alpha","beta","gamma": conterrà LHS; se "terminal": RHS
-    private List<Node> children;    //lista di tutti i nodi figli di questo nodo
-    private List<Object> memory;
+    private final List<Object> value;           //contenuto del nodo (LHS)
+    private List<Node> children;                //lista di tutti i nodi figli di questo nodo
+    private List<Object> memory;                //memoria del nodo (conterra' i token)
+    private final int position;                 //posizione nella tupla del value passato in ingresso
 
     //costruttore
-    public Node(String type, List<Object> value) {
-        this.type = type;
+    public Node(int positionInsideTuple, List<Object> value) {
         this.value = value;
         this.children = new ArrayList<>();
         this.memory = new ArrayList<>();
+        this.position = positionInsideTuple;
+    }
+
+    public void deleteMemory(Object token) {
+        if (this.memory.contains(token)) {
+            this.memory.remove(token);
+        }
     }
 
     //selettori
-    public String getType() {
-        return this.type;
-    }
-
     public List<Object> getValue() {
         return this.value;
     }
@@ -30,5 +32,9 @@ public class Node {
 
     public List<Object> getMemory() {
         return this.memory;
+    }
+
+    public int getPositionInsideTuple() {
+        return this.position;
     }
 }
