@@ -7,11 +7,11 @@ public class Rete {
 
     //campi
     private Node root;                          //nodo da cui si dirama tutta la rete
-    private List<Node> alphaNodesFullList;
-    private List<BetaNode> betaNodesFullList;
-    private List<Node> terminalNodesFullList;
-    private List<Object> tokensFullList;
-    private List<Object> sampleIDFullList;
+    private List<Node> alphaNodesFullList;      //lista che contiene tutti i nodi alpha della rete
+    private List<BetaNode> betaNodesFullList;   //lista che contiene tutti i nodi beta della rete
+    private List<Node> terminalNodesFullList;   //lista che contiene tutti i nodi terminal della rete
+    private List<Object> tokensFullList;        //lista che contiene tutti i token della rete
+    private List<Object> sampleIDFullList;      //lista che contiene tutti i samples della rete
 
     //costruttore
     public Rete() {
@@ -23,10 +23,10 @@ public class Rete {
         this.sampleIDFullList = new ArrayList<>();
     }
 
-    //genera la rete di nodi a partire da lhs e rhs passati in ingresso
-    public void buildRete(List<Object> lhs) {
-        List<Node> alphaNodesCurrentList = new ArrayList<>();
-        List<BetaNode> betaNodesCurrentList = new ArrayList<>();
+    //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query)
+    public void updateRete(List<Object> lhs) {
+        List<Node> alphaNodesCurrentList = new ArrayList<>();       //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
+        List<BetaNode> betaNodesCurrentList = new ArrayList<>();    //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
 
         //per ogni lhs creo un nodo alpha
         for (int i = 0; i < lhs.size(); i++) {
@@ -51,7 +51,7 @@ public class Rete {
         }
         betaNodesCurrentList.add(betaNode);
         
-        //se i lhs sono 2, allora questo nodo beta dovra' avere come nodo figlio il nodo con l'azione (o i nodi con le azioni)
+        //se gli lhs sono 2, allora questo nodo beta e' l'ultimo, genero un nodo terminal figlio
         if(alphaNodesCurrentList.size() == 2) {
             if (betaNode.getChildren().isEmpty()) {
                 Node terminalNode = new Node(-1, null);
@@ -59,7 +59,7 @@ public class Rete {
                 betaNode.getChildren().add(terminalNode);    
             }
         } else {
-            //se le condizioni sono > 2, per ogni condizione successiva, creo un beta (se non esiste gia') che ha come genitori un beta e un alpha
+            //se le gli lhs sono > 2, per ogni condizione successiva, creo un beta (se non esiste gia') che ha come genitori un beta e un alpha
             for (int i = 2; i < alphaNodesCurrentList.size(); i++) {
                 betaNode = findBetaValue(Arrays.asList(betaNodesCurrentList.get(i-2).getValue().get(0), betaNodesCurrentList.get(i-2).getValue().get(1), alphaNodesCurrentList.get(i).getValue().get(0)));
                 if (betaNode == null) {
@@ -71,7 +71,7 @@ public class Rete {
                 //aggiungo ai figli del nodo alpha il nodo beta appena creato
                 alphaNodesCurrentList.get(i).getChildren().add(betaNode);
 
-                //quando arrivo all'ultimo beta, aggiungo alla lista dei suoi figli il nodo terminal con il rhs (sara' l'unico figlio che avra').
+                //quando arrivo all'ultimo beta, aggiungo alla lista dei suoi figli il nodo terminal
                 if (i == alphaNodesCurrentList.size()-1) {
                     if (betaNode.getChildren().isEmpty()) {
                         Node terminalNode = new Node(-1, null);
@@ -83,33 +83,34 @@ public class Rete {
         }
     }
 
-    /*Cerca un pattern all'interno della rete, se trovato lo mostra a video.
-     * ingressi:    'fact': tupla >= 2, se contiene 'null' verra' interpretato come 'ogni cosa che puo' essere inserita in questo posto (al posto di null)'
-     *              'sampleID': identificatore della tupla 'fact', deve essere unico. Verra' associato ad un token generato casualmente e utilizzato nella memoria dei nodi.
-     *              'deleteMemory': scegliere o meno se eliminare il token associato a 'sampleID' dalla memoria dei nodi quando viene trovato un match
-     * esempio:     findMatch(Arrays.asList("email", "a", "marco"), "sample1", false);
-     */
-    public void findMatch(List<Object> fact, Object sampleID, boolean deleteMemory) {
+    //Cerca uno o pie' pattern all'interno della rete, se trovati li mette in output.
+    public void findMatch(String queryConditions, Object sampleID, boolean deleteMemory) {
         List<Object> outputList = new ArrayList<>();
         boolean matchFound = false;
         int i = -1;
 
+        System.out.println("INPUT: " + queryConditions);
+
         //genera un token unico per il sampleID passato in ingresso
         Object token = tokenization(sampleID);
 
-        //per ogni fatto passato in ingresso (ogni elemento della tripla), metto lo stesso token a tutti i nodi alpha che hanno lo stesso value del fatto 
-        for(Object currentFact : fact) {
-            i++;    //indice per memorizzare la posizione del fatto nella tupla 'fact'
-            for (Node alphaNode : alphaNodesFullList) {
+        //separa le condizioni della query e le inserisce in una lista
+        List<List<String>> fact = queryToList(queryConditions);
 
-                //se il fatto e' 'null', allora ogni nodo che e' stato generato dalla tupla lhs che si trovata stessa posizione in cui si trova 'null' nella tupla fact, deve avere in memoria il token. (es: fact{email, null, marco}, lhs{email, a ,marco}, lhs2{email, verso, marco}, in questo caso 'null' assumera' il valore 'a' e 'verso' nelle rispettive tuple, perche' posizionati nella stessa posizione di entrambe le tuple)
-                //(perche' ogni nodo deve rappresentare quello specifico elemento della tupla), in breve: null puo' assumere qualunque valore di soggetto, predicato, oggetto (se la tupla e' da tre), per valori > 3 rappresenta l'elemento della tupla alla posizione i-esima (es: sogg(1),pred(2),ogg(3),4,5,6,7,...)
-                if(currentFact == null && alphaNode.getPositionInsideTuple() == i) {
-                    alphaNode.getMemory().add(token);
-                } else if(alphaNode.getValue().contains(currentFact)) {
-                    if(!alphaNode.getMemory().contains(token)) {
+        //per ogni elemento della tupla, metto lo stesso token a tutti i nodi alpha che hanno lo stesso value del fatto 
+        for (List<String> currentTuple : fact) {
+            for(String currentFact : currentTuple) {
+                i++;    //'i' e' usato come indice per memorizzare la posizione del fatto nella tupla 'fact'
+                for (Node alphaNode : alphaNodesFullList) {
+                    //se il fatto corrisponde ad una variabile, allora ogni nodo che e' stato generato dalla tupla lhs che si trova alla stessa posizione in cui si trova la variabile nella tupla fact, deve avere in memoria il token
+                    if(currentFact.contains("?") && alphaNode.getPositionInsideTuple() == i) {
                         alphaNode.getMemory().add(token);
-                    }       
+                    //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il token alla memoria del nodo
+                    } else if(alphaNode.getValue().contains(currentFact)) {
+                        if(!alphaNode.getMemory().contains(token)) {
+                            alphaNode.getMemory().add(token);
+                        }       
+                    }
                 }
             }
         }
@@ -118,17 +119,17 @@ public class Rete {
                 if (!betaNode.getMemory().contains(token)) {
                     betaNode.getMemory().add(token);
                 }
-                //gli unici nodi figli di un beta sono i nodi terminal che contengono l'rhs, quindi se il beta ha un figlio lo esegue (perche' vuol dire che siamo arrivati al rhs)
+                //gli unici nodi figli di un beta sono i nodi terminal, quindi se il beta ha un figlio lo esegue (perche' vuol dire che siamo arrivati in fondo)
                 if (!betaNode.getChildren().isEmpty()) {
 
                     //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                     outputList.addAll(betaNode.getParent1().getValue());
                     outputList.addAll(betaNode.getParent2().getValue());
-                    System.out.println(outputList);
+                    System.out.println("OUTPUT: " + outputList);
                     matchFound = true;
 
                     //reset della lista
-                    outputList = new ArrayList<>();
+                    outputList.clear();
                 }
             }
         }
@@ -138,6 +139,33 @@ public class Rete {
         if (!matchFound) {
             System.out.println("match not found");
         }
+    }
+
+    //data una query in ingresso (solo le condizioni della query), genera una lista in cui ogni elemento e' un elemento della query. Se trova ";" genera sottoliste che hanno come elementi gli elementi di ogni query.
+    private List<List<String>> queryToList(String queryConditions) {
+        List<String> queryList = Arrays.asList(queryConditions.split("\\s+"));
+        List<List<String>> outputList = new ArrayList<>();
+        List<String> sublist = new ArrayList<>();
+
+        for (String str : queryList) {
+            if (str.contains(";")) {
+                int index = str.indexOf(";");
+                sublist.add(str.substring(0, index));
+                outputList.add(new ArrayList<>(sublist));
+
+                sublist.clear();
+                sublist.add(str.substring(0, index));
+                sublist.addAll(List.of(str.substring(index + 1).split("\\s*,\\s*")));
+            } else {
+                sublist.add(str);
+            }
+        }
+
+        if (!sublist.isEmpty()) {
+            outputList.add(sublist);
+        }
+
+        return outputList;
     }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null
