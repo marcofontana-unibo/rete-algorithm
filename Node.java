@@ -5,7 +5,7 @@ public class Node {
     private final List<Object> value;           //contenuto del nodo (LHS)
     private List<Node> children;                //lista di tutti i nodi figli di questo nodo
     private List<Object> memory;                //memoria del nodo (conterra' i token)
-    private final int position;                 //posizione nella tupla del value passato in ingresso
+    private int position;                       //posizione nella tupla del value passato in ingresso
 
     //costruttore
     public Node(int positionInsideTuple, List<Object> value) {

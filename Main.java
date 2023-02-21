@@ -1,4 +1,3 @@
-import java.lang.Math;
 import java.util.Arrays;
 import java.util.List;
 
@@ -6,54 +5,51 @@ public class Main {
     public static void main(String[] args) {
         Rete rete = new Rete();
         
-        //fatti (tuple non necessariamente da 3, basta che siano > 1)
-        List<Object> lhs1 = Arrays.asList("email", "a", "marco");
-        List<Object> lhs2 = Arrays.asList("email", "a", "gregorio");
-        List<Object> lhs3 = Arrays.asList("email", "a", "gianluca");
-        List<Object> lhs4 = Arrays.asList("email", "verso", "marco");
-        List<Object> lhs5 = Arrays.asList("email", "verso", "gregorio");
-        List<Object> lhs6 = Arrays.asList("posta", "verso", "gianluca");
-        List<Object> lhs7 = Arrays.asList("posta", "verso", "marco");
+        //tuple dentro rete (tuple non necessariamente da 3, basta che siano > 1)
+        List<Object> tuple1 = Arrays.asList("test:email", "test:a", "'marco'");
+        List<Object> tuple2 = Arrays.asList("test:email", "test:a", "'gregorio'");
+        List<Object> tuple3 = Arrays.asList("test:email", "test:a", "'gianluca'");
+        List<Object> tuple4 = Arrays.asList("test:email", "test:verso", "'marco'");
+        List<Object> tuple5 = Arrays.asList("test:email", "test:verso", "'gregorio'");
+        List<Object> tuple6 = Arrays.asList("test:posta", "test:verso", "'gianluca'");
+        List<Object> tuple7 = Arrays.asList("test:posta", "test:verso", "'marco'");
+        List<List<Object>> tuples = Arrays.asList(tuple1, tuple2, tuple3, tuple4, tuple5, tuple6, tuple7);
 
         //creazione dei nodi
-        rete.buildRete(lhs1);
-        rete.buildRete(lhs2);
-        rete.buildRete(lhs3);
-        rete.buildRete(lhs4);
-        rete.buildRete(lhs5);
-        rete.buildRete(lhs6);
-        rete.buildRete(lhs7);
-        
-        //test match
-        System.out.println("-----OUT-----");
-        long start = System.nanoTime();
-        System.out.print("S1: "); System.out.println(); rete.findMatch(Arrays.asList("email", "a","marco"), "sample1", true); System.out.println();
-        long finish = System.nanoTime();
-        System.out.print("S2: "); System.out.println(); rete.findMatch(Arrays.asList("email", "verso","marco"), "sample2", true); System.out.println();
-        System.out.print("S3: "); System.out.println(); rete.findMatch(Arrays.asList("email", null, "marco"), "sample3", false); System.out.println();
-        System.out.print("S4: "); System.out.println(); rete.findMatch(Arrays.asList(null, null, null), "sample4", true); System.out.println();
-        System.out.print("S5: "); System.out.println(); rete.findMatch(Arrays.asList("email", "a","gregorio"), "sample5", false); System.out.println();
-        System.out.print("S6: "); System.out.println(); rete.findMatch(Arrays.asList("posta", "verso","gianluca"), "sample6", true); System.out.println();
-        System.out.print("S7: "); System.out.println(); rete.findMatch(Arrays.asList("tupla", "non dentro","rete"), "sample7", false); System.out.println();
-        System.out.print("S8: "); System.out.println(); rete.findMatch(Arrays.asList(null, null, "marco"), "sample8", true); System.out.println();
-        System.out.print("S9: "); System.out.println(); rete.findMatch(Arrays.asList("email", null, null), "sample9", false); System.out.println();
-        System.out.print("S10: "); System.out.println(); rete.findMatch(Arrays.asList(null, "a", "marco"), "sample10", false); System.out.println();
-        System.out.print("S11: "); System.out.println(); rete.findMatch(Arrays.asList(null, "a", null), "sample11", true); System.out.println();
-        System.out.print("S12: "); System.out.println(); rete.findMatch(Arrays.asList("posta", "a", null), "sample12", true); System.out.println();
-        System.out.print("S13: "); System.out.println(); rete.findMatch(Arrays.asList("posta", "verso", null), "sample13", true); System.out.println();
-
-        //tempo
-        System.out.println("-----TIME-----");
-        System.out.println("time elapsed (first match only): " + (finish - start)/(Math.pow(10,6)) + "ms");
+        System.out.println("-----RETE-----");
+        int i = 0;
+        for (List<Object> tuple : tuples) {
+            i++;
+            long start = System.nanoTime();
+            rete.updateRete(tuple);
+            long finish = System.nanoTime();
+            System.out.println("BUILD" + i + ": " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
+        }
         System.out.println();
+        
+        //mette in uscita tutte le tuple (pattern) tra quelle dentro rete che rispettano il match
+        System.out.println("-----OUT-----");
+        String patternQuery1 = "test:email test:a 'marco'";
+        String patternQuery2 = "test:email test:verso 'marco'";
+        String patternQuery3 = "test:email ?y 'marco'";
+        String patternQuery4 = "?x ?y ?z";
+        String patternQuery5 = "pattern non presente all'interno di rete";
+        List<String> patterns = Arrays.asList(patternQuery1, patternQuery2, patternQuery3, patternQuery4, patternQuery5);
+
+        i = 0;
+        for (String pattern : patterns) {
+            i++;
+            System.out.println("S" + i + ":");
+            long start = System.nanoTime();
+            rete.findMatch(pattern, "ID" + i, false);
+            long finish = System.nanoTime();
+            System.out.println("TIME: " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
+            System.out.println();
+        }
 
         //controllo della rete
         System.out.println("-----RETE-----");
         rete.printRete();
-        System.out.println();
-
-        System.out.println("-----SAMPLES & TOKENS-----");
-        rete.printSamplesAndTokens();
         System.out.println();
     }
 }
