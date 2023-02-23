@@ -6,43 +6,41 @@ public class Main {
         Rete rete = new Rete();
         
         //tuple dentro rete (tuple non necessariamente da 3, basta che siano > 1)
-        List<Object> tuple1 = Arrays.asList("test:email", "test:a", "'marco'");
-        List<Object> tuple2 = Arrays.asList("test:email", "test:a", "'gregorio'");
-        List<Object> tuple3 = Arrays.asList("test:email", "test:a", "'gianluca'");
-        List<Object> tuple4 = Arrays.asList("test:email", "test:verso", "'marco'");
-        List<Object> tuple5 = Arrays.asList("test:email", "test:verso", "'gregorio'");
-        List<Object> tuple6 = Arrays.asList("test:posta", "test:verso", "'gianluca'");
-        List<Object> tuple7 = Arrays.asList("test:posta", "test:verso", "'marco'");
-        List<List<Object>> tuples = Arrays.asList(tuple1, tuple2, tuple3, tuple4, tuple5, tuple6, tuple7);
+        List<String> antecedent1 = Arrays.asList("TheDiamondAge", "is-written-by","NealSpehenson");
+        List<String> antecedent2 = Arrays.asList("NealSpephenson","is-a","science-fiction-writer");
+        List<String> antecedent3 = Arrays.asList("TheDiamongAge","is-a","book");
+        List<List<String>> antecedents = Arrays.asList(antecedent1, antecedent2, antecedent3);
+        List<String> antecedent4 = Arrays.asList("Neuromancer", "is-written-by","WilliamGibson");
+        List<String> antecedent5 = Arrays.asList("WilliamGibson","is-a","science-fiction-writer");
+        List<String> antecedent6 = Arrays.asList("TheDiamongAge","is-a","book");
+        List<List<String>> antecedents2 = Arrays.asList(antecedent4, antecedent5, antecedent6);
 
         //creazione dei nodi
         System.out.println("-----RETE-----");
-        int i = 0;
-        for (List<Object> tuple : tuples) {
-            i++;
-            long start = System.nanoTime();
-            rete.updateRete(tuple);
-            long finish = System.nanoTime();
-            System.out.println("BUILD" + i + ": " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
-        }
+        long start = System.nanoTime();
+        rete.updateRete(antecedents);
+        long finish = System.nanoTime();
+        System.out.println("BUILD 1: " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
+        System.out.println();
+
+        start = System.nanoTime();
+        rete.updateRete(antecedents2);
+        finish = System.nanoTime();
+        System.out.println("BUILD 2: " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
         System.out.println();
         
         //mette in uscita tutte le tuple (pattern) tra quelle dentro rete che rispettano il match
         System.out.println("-----OUT-----");
-        String patternQuery1 = "test:email test:a 'marco'";
-        String patternQuery2 = "test:email test:verso 'marco'";
-        String patternQuery3 = "test:email ?y 'marco'";
-        String patternQuery4 = "?x ?y ?z";
-        String patternQuery5 = "pattern non presente all'interno di rete";
-        List<String> patterns = Arrays.asList(patternQuery1, patternQuery2, patternQuery3, patternQuery4, patternQuery5);
+        String pattern = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer ; TheDiamongAge is-a book";
+        List<String> patternList = Arrays.asList(pattern);  //lo metto in una lista in modo da poterlo iterare
 
-        i = 0;
-        for (String pattern : patterns) {
+        int i = 0;
+        for (String currentPattern : patternList) {
             i++;
             System.out.println("S" + i + ":");
-            long start = System.nanoTime();
-            rete.findMatch(pattern, "ID" + i, false);
-            long finish = System.nanoTime();
+            start = System.nanoTime();
+            rete.findMatch(currentPattern, "ID" + i, false);
+            finish = System.nanoTime();
             System.out.println("TIME: " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
             System.out.println();
         }

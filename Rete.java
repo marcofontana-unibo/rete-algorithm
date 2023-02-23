@@ -19,7 +19,7 @@ public class Rete {
     }
 
     //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query)
-    public void updateRete(List<Object> lhs) {
+    public void updateRete(List<List<String>> lhs) {
         List<Node> alphaNodesCurrentList = new ArrayList<>();       //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
         List<BetaNode> betaNodesCurrentList = new ArrayList<>();    //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
 
@@ -79,18 +79,19 @@ public class Rete {
     }
 
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.
-    public void findMatch(String queryPattern, Object sampleID, boolean deleteMemory) {
+    public void findMatch(String pattern, Object sampleID, boolean deleteMemory) {
         List<Object> outputList = new ArrayList<>();
         boolean matchFound = false;
         int i = -1;
 
-        System.out.println("INPUT: " + queryPattern);
+        System.out.println("INPUT: " + pattern);
 
         //separa le condizioni della query e le inserisce in una lista
-        List<String> fact = queryToList(queryPattern);
+        List<List<String>> fact = stringToList(pattern);
+        System.out.println("FATTO:" + fact);
 
         //per ogni elemento della tupla, metto lo stesso token a tutti i nodi alpha che hanno lo stesso value del fatto 
-        for(String currentFact : fact) {
+        for(List<String> currentFact : fact) {
             i++;    //'i' e' usato come indice per memorizzare la posizione del fatto nella tupla 'fact'
             for (Node alphaNode : alphaNodesFullList) {
                 //se il fatto corrisponde ad una variabile, allora ogni nodo che e' stato generato dalla tupla lhs che si trova alla stessa posizione in cui si trova la variabile nella tupla fact, deve avere in memoria il token
@@ -132,8 +133,16 @@ public class Rete {
     }
 
     //data una query in ingresso (solo le condizioni della query), genera una lista in cui ogni elemento e' un elemento della query. Se trova ";" genera sottoliste che hanno come elementi gli elementi di ogni query.
-    private List<String> queryToList(String queryPattern) {
-        return Arrays.asList(queryPattern.split("\\s+"));
+    private List<List<String>> stringToList(String string) {
+        List<List<String>> outString = new ArrayList<>();
+        List<String> fullList = Arrays.asList(string.split("\\s+"));
+        for (int i = 1; i < fullList.size()+2; i++) {
+            //se non e' il carattere ";" che separa gli lhs, inserisce l'lhs nella lista (come sottolista)
+            if (i%4 == 0) {
+                outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
+            }
+        }
+        return outString;
     }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null
