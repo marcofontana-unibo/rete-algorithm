@@ -12,7 +12,7 @@ public class Rete {
 
     //costruttore
     public Rete() {
-        this.root = new Node(-1,null);
+        this.root = new Node(null);
         this.alphaNodesFullList = new ArrayList<>();
         this.betaNodesFullList = new ArrayList<>();
         this.terminalNodesFullList = new ArrayList<>();
@@ -29,7 +29,7 @@ public class Rete {
             //se esiste gia' un nodo alpha con lo stesso lhs, non ne crea un altro
             Node alphaNode = findAlphaValue(alphaNodesFullList, lhs.get(i));
             if (alphaNode == null) {
-                alphaNode = new Node(i, Arrays.asList(lhs.get(i)));
+                alphaNode = new Node(Arrays.asList(lhs.get(i)));
                 this.root.getChildren().add(alphaNode);
                 alphaNodesFullList.add(alphaNode);
             }
@@ -49,7 +49,7 @@ public class Rete {
         //se gli lhs sono 2, allora questo nodo beta e' l'ultimo, genero un nodo terminal figlio
         if(alphaNodesCurrentList.size() == 2) {
             if (betaNode.getChildren().isEmpty()) {
-                Node terminalNode = new Node(-1, null);
+                Node terminalNode = new Node(null);
                 terminalNodesFullList.add(terminalNode);
                 betaNode.getChildren().add(terminalNode);    
             }
@@ -69,7 +69,7 @@ public class Rete {
                 //quando arrivo all'ultimo beta, aggiungo alla lista dei suoi figli il nodo terminal
                 if (i == alphaNodesCurrentList.size()-1) {
                     if (betaNode.getChildren().isEmpty()) {
-                        Node terminalNode = new Node(-1, null);
+                        Node terminalNode = new Node(null);
                         terminalNodesFullList.add(terminalNode);
                         betaNode.getChildren().add(terminalNode);    
                     }
@@ -82,23 +82,21 @@ public class Rete {
     public void findMatch(String pattern, Object sampleID, boolean deleteMemory) {
         List<Object> outputList = new ArrayList<>();
         boolean matchFound = false;
-        int i = -1;
 
         System.out.println("INPUT: " + pattern);
 
         //separa le condizioni della query e le inserisce in una lista
         List<List<String>> fact = stringToList(pattern);
-        System.out.println("FATTO:" + fact);
 
         //per ogni elemento della tupla, metto lo stesso token a tutti i nodi alpha che hanno lo stesso value del fatto 
         for(List<String> currentFact : fact) {
-            i++;    //'i' e' usato come indice per memorizzare la posizione del fatto nella tupla 'fact'
             for (Node alphaNode : alphaNodesFullList) {
                 //se il fatto corrisponde ad una variabile, allora ogni nodo che e' stato generato dalla tupla lhs che si trova alla stessa posizione in cui si trova la variabile nella tupla fact, deve avere in memoria il token
-                if(currentFact.contains("?") && alphaNode.getPositionInsideTuple() == i) {
-                    alphaNode.getMemory().add(sampleID);
+                //if(currentFact.contains("?")) {
+                    //TODO: al momento non controlla il nome della variabile, associa il token a qualunque variabile indipendentemente da quale sia
+                //    alphaNode.getMemory().add(sampleID);
                 //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il token alla memoria del nodo
-                } else if(alphaNode.getValue().contains(currentFact)) {
+                /*} else*/ if(alphaNode.getValue().contains(currentFact)) {
                     if(!alphaNode.getMemory().contains(sampleID)) {
                         alphaNode.getMemory().add(sampleID);
                     }       

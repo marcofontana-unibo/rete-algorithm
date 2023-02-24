@@ -5,7 +5,7 @@ public class BetaNode extends Node {
     private Node parent2;
 
     public BetaNode(int positionInsideTuple, List<Object> ParentsValue, Node parent1, Node parent2) {
-        super(positionInsideTuple, ParentsValue);
+        super(ParentsValue);
         this.parent1 = parent1;
         this.parent2 = parent2;
     }
