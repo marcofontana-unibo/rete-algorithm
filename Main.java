@@ -5,7 +5,7 @@ public class Main {
     public static void main(String[] args) {
         Rete rete = new Rete();
         
-        //tuple dentro rete (tuple non necessariamente da 3, basta che siano > 1)
+        //dichiarazione antecedents
         List<String> antecedent1 = Arrays.asList("TheDiamondAge", "is-written-by","NealSpehenson");
         List<String> antecedent2 = Arrays.asList("NealSpephenson","is-a","science-fiction-writer");
         List<String> antecedent3 = Arrays.asList("TheDiamondAge","is-a","book");
@@ -29,7 +29,7 @@ public class Main {
             long start = System.nanoTime();
             rete.updateRete(antecedent);
             long finish = System.nanoTime();
-            System.out.println("BUILD " + i + ":" + Math.round((finish - start)*Math.pow(10, -6))+"ms");
+            System.out.println("BUILD" + i + ": " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
             System.out.println();
         }
         
@@ -37,13 +37,14 @@ public class Main {
         System.out.println("-----OUT-----");
         String pattern1 = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer ; TheDiamondAge is-a book";
         String pattern2 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book";
-        String pattern3 = "";
+        String pattern3 = "pattern not-inside rete";
         String pattern4 = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer";
         String pattern5 = "TheDiamondAge is-written-by NealSpehenson";
         String pattern6 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book ; TheDiamondAge is-a book";
-        //TODO: match con pattern7 ancora non funziona
-        //String pattern6 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
-        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6 /*, pattern7*/);
+        String pattern7 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
+        String pattern8 = "?x ?y ?z";
+        String pattern9 = "?x is-written-by ?y ; ?t ?k ?w";
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9);
 
         i = 0;
         for (String currentPattern : patternList) {

@@ -71,17 +71,27 @@ public class Rete {
         for(List<String> currentFact : fact) {
             for (AlphaNode alphaNode : alphaNodesFullList) {
                 //se il fatto corrisponde ad una variabile, allora ogni nodo che e' stato generato dalla tupla lhs che si trova alla stessa posizione in cui si trova la variabile nella tupla fact, deve avere in memoria il token
-                //if(currentFact.contains("?")) {
-                    //TODO: al momento non controlla il nome della variabile, associa il token a qualunque variabile indipendentemente da quale sia
-                //    alphaNode.getMemory().add(sampleID);
+                for (String factElement : currentFact) {
+                    //TODO: sistema variabili
+                    if (factElement.contains("?")) {
+                        if(!alphaNode.getMemory().contains(sampleID)) {
+                            alphaNode.getMemory().add(sampleID);
+                        }
+                        if(alphaNode.getValue().size() == fact.size()) {
+                            System.out.println("OUTPUT : " + listFlattener(alphaNode.getValue()));
+                            matchFound = true;
+                            break;
+                        }
+                    }
+                }
                 //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il token alla memoria del nodo
-                /*} else*/ if(alphaNode.getValue().contains(currentFact)) {
+                if(alphaNode.getValue().contains(currentFact)) {
                     if(!alphaNode.getMemory().contains(sampleID)) {
                         alphaNode.getMemory().add(sampleID);
                     }
                     if(alphaNode.getValue().size() == fact.size()) {
-                        System.out.println("OUTPUT: " + alphaNode.getValue().toString());
-                        return;
+                        System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
+                        matchFound = true;
                     }
                 }
             }
@@ -116,7 +126,7 @@ public class Rete {
         List<List<String>> outString = new ArrayList<>();
         List<String> fullList = Arrays.asList(string.split("\\s+"));
         for (int i = 1; i < fullList.size()+2; i++) {
-            //se non e' il carattere ";" che separa gli lhs, inserisce l'lhs nella lista (come sottolista)
+            //se non e' il carattere ";" (carattere che separa gli lhs), inserisce l'lhs nella lista (come sottolista)
             if (i%4 == 0) {
                 outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
             }
