@@ -8,16 +8,17 @@ public class Main {
         //tuple dentro rete (tuple non necessariamente da 3, basta che siano > 1)
         List<String> antecedent1 = Arrays.asList("TheDiamondAge", "is-written-by","NealSpehenson");
         List<String> antecedent2 = Arrays.asList("NealSpephenson","is-a","science-fiction-writer");
-        List<String> antecedent3 = Arrays.asList("TheDiamongAge","is-a","book");
+        List<String> antecedent3 = Arrays.asList("TheDiamondAge","is-a","book");
         List<List<String>> antecedents1 = Arrays.asList(antecedent1, antecedent2, antecedent3);
         List<String> antecedent4 = Arrays.asList("Neuromancer", "is-written-by","WilliamGibson");
         List<String> antecedent5 = Arrays.asList("WilliamGibson","is-a","science-fiction-writer");
-        List<String> antecedent6 = Arrays.asList("TheDiamongAge","is-a","book");
-        List<List<String>> antecedents2 = Arrays.asList(antecedent4, antecedent5, antecedent6);
-        List<String> antecedent7 = Arrays.asList("MazeOfDeath", "is-written-by","PhilipKDick");
-        List<String> antecedent8 = Arrays.asList("PhilipKDick","is-a","science-fiction-writer");
-        List<String> antecedent9 = Arrays.asList("MazeOfDeath","is-a","book");
-        List<List<String>> antecedents3 = Arrays.asList(antecedent7, antecedent8, antecedent9);
+        List<String> antecedent6 = Arrays.asList("Neuromancer","is-a","book");
+        List<String> antecedent7= Arrays.asList("TheDiamondAge","is-a","book");
+        List<List<String>> antecedents2 = Arrays.asList(antecedent4, antecedent5, antecedent6, antecedent7);
+        List<String> antecedent8 = Arrays.asList("MazeOfDeath", "is-written-by","PhilipKDick");
+        List<String> antecedent9 = Arrays.asList("PhilipKDick","is-a","science-fiction-writer");
+        List<String> antecedent10 = Arrays.asList("MazeOfDeath","is-a","book");
+        List<List<String>> antecedents3 = Arrays.asList(antecedent8, antecedent9, antecedent10);
         List<List<List<String>>> antecedents = Arrays.asList(antecedents1, antecedents2, antecedents3);
         
         //creazione dei nodi
@@ -34,10 +35,15 @@ public class Main {
         
         //mette in uscita tutte le tuple (pattern) tra quelle dentro rete che rispettano il match
         System.out.println("-----OUT-----");
-        String pattern = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer ; TheDiamongAge is-a book";
-        //match con pattern2 ancora non funziona
-        //String pattern2 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
-        List<String> patternList = Arrays.asList(pattern/*, pattern2*/);
+        String pattern1 = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer ; TheDiamondAge is-a book";
+        String pattern2 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book";
+        String pattern3 = "";
+        String pattern4 = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer";
+        String pattern5 = "TheDiamondAge is-written-by NealSpehenson";
+        String pattern6 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book ; TheDiamondAge is-a book";
+        //TODO: match con pattern7 ancora non funziona
+        //String pattern6 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6 /*, pattern7*/);
 
         i = 0;
         for (String currentPattern : patternList) {

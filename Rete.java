@@ -5,32 +5,27 @@ import java.util.Arrays;
 public class Rete {
 
     //campi
-    private Node root;                          //nodo da cui si dirama tutta la rete
-    private List<Node> alphaNodesFullList;      //lista che contiene tutti i nodi alpha della rete
-    private List<BetaNode> betaNodesFullList;   //lista che contiene tutti i nodi beta della rete
-    private List<Node> terminalNodesFullList;   //lista che contiene tutti i nodi terminal della rete
+    private List<AlphaNode> alphaNodesFullList;      //lista che contiene tutti i nodi alpha della rete
+    private List<BetaNode> betaNodesFullList;        //lista che contiene tutti i nodi beta della rete
 
     //costruttore
     public Rete() {
-        this.root = new Node(null);
         this.alphaNodesFullList = new ArrayList<>();
         this.betaNodesFullList = new ArrayList<>();
-        this.terminalNodesFullList = new ArrayList<>();
     }
 
     //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query)
     public void updateRete(List<List<String>> lhs) {
-        List<Node> alphaNodesCurrentList = new ArrayList<>();       //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
+        List<AlphaNode> alphaNodesCurrentList = new ArrayList<>();       //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
         List<BetaNode> betaNodesCurrentList = new ArrayList<>();    //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
 
         //per ogni lhs creo un nodo alpha
         for (int i = 0; i < lhs.size(); i++) {
 
             //se esiste gia' un nodo alpha con lo stesso lhs, non ne crea un altro
-            Node alphaNode = findAlphaValue(alphaNodesFullList, lhs.get(i));
+            AlphaNode alphaNode = findAlphaValue(alphaNodesFullList, lhs.get(i));
             if (alphaNode == null) {
-                alphaNode = new Node(Arrays.asList(lhs.get(i)));
-                this.root.getChildren().add(alphaNode);
+                alphaNode = new AlphaNode(Arrays.asList(lhs.get(i)));
                 alphaNodesFullList.add(alphaNode);
             }
 
@@ -41,39 +36,23 @@ public class Rete {
         //creo un beta con genitori i due alpha che contengono i primi due lhs passati in ingresso al metodo
         BetaNode betaNode = findBetaValue(Arrays.asList(alphaNodesCurrentList.get(0).getValue().get(0), alphaNodesCurrentList.get(1).getValue().get(0)));
         if (betaNode == null) {
-            betaNode = new BetaNode(-1, Arrays.asList(alphaNodesCurrentList.get(0).getValue().get(0), alphaNodesCurrentList.get(1).getValue().get(0)), alphaNodesCurrentList.get(0), alphaNodesCurrentList.get(1));
+            betaNode = new BetaNode(Arrays.asList(alphaNodesCurrentList.get(0).getValue().get(0), alphaNodesCurrentList.get(1).getValue().get(0)), alphaNodesCurrentList.get(0), alphaNodesCurrentList.get(1));
             betaNodesFullList.add(betaNode);
         }
         betaNodesCurrentList.add(betaNode);
         
-        //se gli lhs sono 2, allora questo nodo beta e' l'ultimo, genero un nodo terminal figlio
         if(alphaNodesCurrentList.size() == 2) {
             if (betaNode.getChildren().isEmpty()) {
-                Node terminalNode = new Node(null);
-                terminalNodesFullList.add(terminalNode);
-                betaNode.getChildren().add(terminalNode);    
             }
         } else {
-            //se gli lhs sono > 2, per ogni lhs successivo, creo un beta (se non esiste gia') che ha come genitori un beta e un alpha
+            //se i lhs sono > 2, per ogni lhs successivo, creo un beta (se non esiste gia') che ha come genitori un beta e un alpha
             for (int i = 2; i < alphaNodesCurrentList.size(); i++) {
                 betaNode = findBetaValue(Arrays.asList(betaNodesCurrentList.get(i-2).getValue(), alphaNodesCurrentList.get(i).getValue().get(0)));
                 if (betaNode == null) {
-                    betaNode = new BetaNode(-1, Arrays.asList(betaNodesCurrentList.get(i-2).getValue(), alphaNodesCurrentList.get(i).getValue().get(0)), betaNodesCurrentList.get(i-2), alphaNodesCurrentList.get(i));   
+                    betaNode = new BetaNode(Arrays.asList(betaNodesCurrentList.get(i-2).getValue(), alphaNodesCurrentList.get(i).getValue().get(0)), betaNodesCurrentList.get(i-2), alphaNodesCurrentList.get(i));   
                     betaNodesFullList.add(betaNode);
                 }
                 betaNodesCurrentList.add(betaNode);
-
-                //aggiungo ai figli del nodo alpha il nodo beta appena creato
-                alphaNodesCurrentList.get(i).getChildren().add(betaNode);
-
-                //quando arrivo all'ultimo beta, aggiungo alla lista dei suoi figli il nodo terminal
-                if (i == alphaNodesCurrentList.size()-1) {
-                    if (betaNode.getChildren().isEmpty()) {
-                        Node terminalNode = new Node(null);
-                        terminalNodesFullList.add(terminalNode);
-                        betaNode.getChildren().add(terminalNode);    
-                    }
-                }
             }
         }
     }
@@ -90,7 +69,7 @@ public class Rete {
 
         //per ogni elemento della tupla, metto lo stesso token a tutti i nodi alpha che hanno lo stesso value del fatto 
         for(List<String> currentFact : fact) {
-            for (Node alphaNode : alphaNodesFullList) {
+            for (AlphaNode alphaNode : alphaNodesFullList) {
                 //se il fatto corrisponde ad una variabile, allora ogni nodo che e' stato generato dalla tupla lhs che si trova alla stessa posizione in cui si trova la variabile nella tupla fact, deve avere in memoria il token
                 //if(currentFact.contains("?")) {
                     //TODO: al momento non controlla il nome della variabile, associa il token a qualunque variabile indipendentemente da quale sia
@@ -99,7 +78,11 @@ public class Rete {
                 /*} else*/ if(alphaNode.getValue().contains(currentFact)) {
                     if(!alphaNode.getMemory().contains(sampleID)) {
                         alphaNode.getMemory().add(sampleID);
-                    }       
+                    }
+                    if(alphaNode.getValue().size() == fact.size()) {
+                        System.out.println("OUTPUT: " + alphaNode.getValue().toString());
+                        return;
+                    }
                 }
             }
         }
@@ -108,9 +91,7 @@ public class Rete {
                 if (!betaNode.getMemory().contains(sampleID)) {
                     betaNode.getMemory().add(sampleID);
                 }
-                //gli unici nodi figli di un beta sono i nodi terminal, quindi se il beta ha un figlio lo esegue (perche' vuol dire che siamo arrivati in fondo)
-                if (!betaNode.getChildren().isEmpty()) {
-
+                if (listFlattener(betaNode.getValue()).size() == fact.size()*3) {
                     //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                     outputList.addAll(betaNode.getParent1().getValue());
                     outputList.addAll(betaNode.getParent2().getValue());
@@ -144,8 +125,8 @@ public class Rete {
     }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null
-    private Node findAlphaValue(List<Node> nodeList, Object value) {
-        for (Node node : nodeList) {
+    private AlphaNode findAlphaValue(List<AlphaNode> nodeList, Object value) {
+        for (AlphaNode node : nodeList) {
             if (node.getValue().contains(value)) {
                 return node;
             }
@@ -164,13 +145,13 @@ public class Rete {
     }
 
     //elimina la memoria (token) dai nodi
-    private void deleteNodesMemory(Object token) {
-        for (Node alphaNode : alphaNodesFullList) {
-            alphaNode.deleteMemory(token);
+    private void deleteNodesMemory(Object sampleID) {
+        for (AlphaNode alphaNode : alphaNodesFullList) {
+            alphaNode.deleteMemory(sampleID);
 
         }
         for (BetaNode betaNode : betaNodesFullList) {
-            betaNode.deleteMemory(token);
+            betaNode.deleteMemory(sampleID);
         }
     }
 
@@ -189,45 +170,22 @@ public class Rete {
 
     //stampa a video i nodi della rete
     public void printRete() {
-        System.out.println("root: " + 1);
-        System.out.println();
-
         System.out.println("alphaNodes: " + getNumAlphaNodes());
-        for (Node alphaNode : alphaNodesFullList) {
+        for (AlphaNode alphaNode : alphaNodesFullList) {
             System.out.print(" Value:" + alphaNode.getValue().toString());
-            System.out.print(" Token:" + alphaNode.getMemory().toString());
+            System.out.print(" Memory:" + alphaNode.getMemory().toString());
             System.out.println();
         }
         System.out.println();
         System.out.println("betaNodes: " + getNumBetaNodes());
         for (BetaNode betaNode : betaNodesFullList) {
             System.out.print(" Value:" + betaNode.getValue().toString());
-            System.out.print(" Token:" + betaNode.getMemory().toString());
+            System.out.print(" Memory:" + betaNode.getMemory().toString());
             System.out.println();
-        }
-        System.out.println();
-        System.out.println("terminalNodes: " + getNumTerminalNodes());
-        System.out.println();
-        System.out.println("total rete size: " + getNumTotNodes());
-        
-        System.out.println();
-        System.out.println("every possible match");
-        for (BetaNode betaNode : betaNodesFullList) {
-            if (!betaNode.getChildren().isEmpty()) {
-                List<Object> CombinationsToRhs = new ArrayList<>();
-                CombinationsToRhs.addAll(betaNode.getParent1().getValue());
-                CombinationsToRhs.addAll(betaNode.getParent2().getValue());
-                System.out.println(listFlattener(CombinationsToRhs));
-                CombinationsToRhs.clear();
-            }
         }
     }
 
     //selettori
-    public Node getRoot() {
-        return this.root;
-    }
-
     public int getNumAlphaNodes() {
         return this.alphaNodesFullList.size();  //non utilizzo 'alphaNodesFullList.size()' perche' ho pensato fosse piu' efficiente così. Stessa cosa per gli altri
     }
@@ -236,15 +194,11 @@ public class Rete {
         return this.betaNodesFullList.size();
     }
 
-    public int getNumTerminalNodes() {
-        return this.terminalNodesFullList.size();
-    }
-
     public int getNumTotNodes() {
-        return getNumAlphaNodes() + getNumBetaNodes() + getNumTerminalNodes() + 1;  //+1 per il nodo di root
+        return getNumAlphaNodes() + getNumBetaNodes();
     }
 
-    public List<Node> getAlphaNodesList() {
+    public List<AlphaNode> getAlphaNodesList() {
         return this.alphaNodesFullList;
     }
 
