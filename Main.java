@@ -22,6 +22,7 @@ public class Main {
         List<List<List<String>>> antecedents = Arrays.asList(antecedents1, antecedents2, antecedents3);
         
         //creazione dei nodi
+        System.out.println();
         System.out.println("-----RETE-----");
         int i = 0;
         for (List<List<String>> antecedent : antecedents) {
@@ -29,9 +30,9 @@ public class Main {
             long start = System.nanoTime();
             rete.updateRete(antecedent);
             long finish = System.nanoTime();
-            System.out.println("BUILD" + i + ": " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
-            System.out.println();
+            System.out.println("RETE" + i + ": " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
         }
+        System.out.println();
         
         //mette in uscita tutte le tuple (pattern) tra quelle dentro rete che rispettano il match
         System.out.println("-----OUT-----");
@@ -43,8 +44,9 @@ public class Main {
         String pattern6 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book ; TheDiamondAge is-a book";
         String pattern7 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
         String pattern8 = "?x ?y ?z";
-        String pattern9 = "?x is-written-by ?y ; ?t ?k ?w";
-        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9);
+        String pattern9 = "?x ciao ?y ; ?t ?k ?w";
+        String pattern10 = "?x is-written-by WilliamGibson";
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10);
 
         i = 0;
         for (String currentPattern : patternList) {
@@ -53,7 +55,7 @@ public class Main {
             long start = System.nanoTime();
             rete.findMatch(currentPattern, "ID" + i, false);
             long finish = System.nanoTime();
-            System.out.println("TIME: " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
+            System.out.println("TIME: " + (finish - start)*Math.pow(10, -6)+"ms");
             System.out.println();
         }
 

@@ -2,14 +2,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlphaNode {
-    private final List<Object> value;           //contenuto del nodo (LHS)
-    private List<AlphaNode> children;           //lista di tutti i nodi figli di questo nodo
-    private List<Object> memory;                //memoria del nodo (conterra' i token)
+    private List<Object> value;                 //contenuto del nodo (LHS)
+    private List<Object> memory;                //memoria del nodo (conterra' i sampleID)
 
     //costruttore
     public AlphaNode(List<Object> value) {
         this.value = value;
-        this.children = new ArrayList<>();
         this.memory = new ArrayList<>();
     }
 
@@ -22,10 +20,6 @@ public class AlphaNode {
     //selettori
     public List<Object> getValue() {
         return this.value;
-    }
-
-    public List<AlphaNode> getChildren() {
-        return this.children;
     }
 
     public List<Object> getMemory() {

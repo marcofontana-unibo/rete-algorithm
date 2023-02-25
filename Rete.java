@@ -16,8 +16,8 @@ public class Rete {
 
     //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query)
     public void updateRete(List<List<String>> lhs) {
-        List<AlphaNode> alphaNodesCurrentList = new ArrayList<>();       //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
-        List<BetaNode> betaNodesCurrentList = new ArrayList<>();    //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
+        List<AlphaNode> alphaNodesCurrentList = new ArrayList<>();      //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
+        List<BetaNode> betaNodesCurrentList = new ArrayList<>();        //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
 
         //per ogni lhs creo un nodo alpha
         for (int i = 0; i < lhs.size(); i++) {
@@ -27,13 +27,14 @@ public class Rete {
             if (alphaNode == null) {
                 alphaNode = new AlphaNode(Arrays.asList(lhs.get(i)));
                 alphaNodesFullList.add(alphaNode);
-            }
 
-            //aggiungo il nodo alpha al nodo root padre
+                //TODO: sempre per il caso variabili, crea dei sotto-nodi alpha nel caso in cui questo alpha conterra' come value una variabile
+                //alphaNode.getChildren().add(new AlphaNode(null));
+            }
             alphaNodesCurrentList.add(alphaNode);
         }
 
-        //creo un beta con genitori i due alpha che contengono i primi due lhs passati in ingresso al metodo
+        //creo un beta con genitori i due alpha che contengono i primi due lhs passati in ingresso al metodo (se non esiste gia')
         BetaNode betaNode = findBetaValue(Arrays.asList(alphaNodesCurrentList.get(0).getValue().get(0), alphaNodesCurrentList.get(1).getValue().get(0)));
         if (betaNode == null) {
             betaNode = new BetaNode(Arrays.asList(alphaNodesCurrentList.get(0).getValue().get(0), alphaNodesCurrentList.get(1).getValue().get(0)), alphaNodesCurrentList.get(0), alphaNodesCurrentList.get(1));
@@ -41,11 +42,8 @@ public class Rete {
         }
         betaNodesCurrentList.add(betaNode);
         
-        if(alphaNodesCurrentList.size() == 2) {
-            if (betaNode.getChildren().isEmpty()) {
-            }
-        } else {
-            //se i lhs sono > 2, per ogni lhs successivo, creo un beta (se non esiste gia') che ha come genitori un beta e un alpha
+        //se i lhs sono > 2, per ogni lhs successivo, creo un beta (se non esiste gia') che ha come genitori un beta e un alpha
+        if(alphaNodesCurrentList.size() > 2) {
             for (int i = 2; i < alphaNodesCurrentList.size(); i++) {
                 betaNode = findBetaValue(Arrays.asList(betaNodesCurrentList.get(i-2).getValue(), alphaNodesCurrentList.get(i).getValue().get(0)));
                 if (betaNode == null) {
@@ -67,24 +65,32 @@ public class Rete {
         //separa le condizioni della query e le inserisce in una lista
         List<List<String>> fact = stringToList(pattern);
 
-        //per ogni elemento della tupla, metto lo stesso token a tutti i nodi alpha che hanno lo stesso value del fatto 
+        //per ogni elemento della tupla, metto lo stesso sampleID a tutti i nodi alpha che hanno lo stesso value del fatto 
         for(List<String> currentFact : fact) {
             for (AlphaNode alphaNode : alphaNodesFullList) {
-                //se il fatto corrisponde ad una variabile, allora ogni nodo che e' stato generato dalla tupla lhs che si trova alla stessa posizione in cui si trova la variabile nella tupla fact, deve avere in memoria il token
                 for (String factElement : currentFact) {
                     //TODO: sistema variabili
-                    if (factElement.contains("?")) {
+                    if (factElement.startsWith("?") || factElement.startsWith("$")) {
                         if(!alphaNode.getMemory().contains(sampleID)) {
                             alphaNode.getMemory().add(sampleID);
                         }
+                        //crea i sottonodi alpha per distinguere le singole variabili
+                        /*for (AlphaNode alphaChild : alphaNode.getChildren()) {
+                            if (!alphaChild.getValue().contains(factElement) && alphaChild.getValue().isEmpty()) {
+                                alphaChild.getValue().add(factElement);
+                                if (!alphaChild.getMemory().contains(sampleID)) {
+                                    alphaNode.getMemory().add(sampleID);
+                                }
+                            }
+                        }*/
                         if(alphaNode.getValue().size() == fact.size()) {
-                            System.out.println("OUTPUT : " + listFlattener(alphaNode.getValue()));
+                            System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
                             matchFound = true;
                             break;
                         }
                     }
                 }
-                //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il token alla memoria del nodo
+                //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il sampleID alla memoria del nodo
                 if(alphaNode.getValue().contains(currentFact)) {
                     if(!alphaNode.getMemory().contains(sampleID)) {
                         alphaNode.getMemory().add(sampleID);
@@ -126,6 +132,7 @@ public class Rete {
         List<List<String>> outString = new ArrayList<>();
         List<String> fullList = Arrays.asList(string.split("\\s+"));
         for (int i = 1; i < fullList.size()+2; i++) {
+            //TODO: sistemare
             //se non e' il carattere ";" (carattere che separa gli lhs), inserisce l'lhs nella lista (come sottolista)
             if (i%4 == 0) {
                 outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
