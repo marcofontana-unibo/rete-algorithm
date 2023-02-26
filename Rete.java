@@ -118,11 +118,31 @@ public class Rete {
     private List<List<String>> queryToList(String string) {
         List<List<String>> outString = new ArrayList<>();
         List<String> fullList = Arrays.asList(string.split("\\s+"));
-        for (int i = 1; i < fullList.size()+2; i++) {
-            //TODO: sistemare per casi come '?x ?y ?z ; ?k ?t'
-            //se non e' il carattere ";" (carattere che separa gli lhs), inserisce l'lhs nella lista (come sottolista)
-            if (i%4 == 0) {
-                outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
+        int found = 0;
+
+        //conta le occorrente di ";" all'interno della stringa (vd. prossime righe)
+        for (String currentString : fullList) {
+            if (currentString.matches(";")) {
+                found++;
+            }
+        }
+        //se la query e' del tipo "a b c ; d e f ; ..."
+        if (((found*4)+4) == fullList.size()+1) {
+            for (int i = 1; i < fullList.size()+2; i++) {
+                if (i%4 == 0) {
+                    outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
+                }
+            }
+        } else {
+        //se la query e' del tipo "a b c ; d e ; ... "
+            for (int i = 1; i < fullList.size()+2; i++) {
+                if ((i-1) % 3 == 0 && ((i-1) != 0)) {
+                    if ((i-1) >= 6) {
+                        outString.add(Arrays.asList(fullList.get(0), fullList.get(i-3), fullList.get(i-2)));
+                    } else {
+                        outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
+                    }
+                }
             }
         }
         return outString;

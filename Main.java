@@ -1,6 +1,11 @@
 import java.util.Arrays;
 import java.util.List;
 
+/*TODO LIST:
+ * - variabili (al momento funziona correttamente solo per query con una sola tripla)
+ * - unico output
+ */
+
 public class Main {
     public static void main(String[] args) {
         Rete rete = new Rete();
@@ -59,8 +64,9 @@ public class Main {
         String pattern17 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
         String pattern18 = "TheDiamondAge is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
         String pattern19 = "?x is-written-by ?y ; is-written-by ?y";
+        String pattern20 = "?x is-written-by ?y ; is-written-by ?y ; is-a ?z";
 
-        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18, pattern19);
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18, pattern19, pattern20);
 
         i = 0;
         for (String currentPattern : patternList) {
