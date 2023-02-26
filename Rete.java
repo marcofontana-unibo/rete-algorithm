@@ -1,6 +1,8 @@
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Rete {
 
@@ -79,30 +81,18 @@ public class Rete {
         //per ogni elemento della tupla, metto lo stesso sampleID a tutti i nodi alpha che hanno lo stesso value del fatto 
         for(List<String> currentFact : fact) {
             for (AlphaNode alphaNode : alphaNodesFullList) {
+                
                 for (String factElement : currentFact) {
                     //TODO: sistema variabili
-                    //se il fatto e' una variabile lancia ricorsivamente questo metodo con tutti i possibili pattern
+                    //se il fatto e' una variabile lancia ricorsivamente questo metodo per trovare tutti i possibili pattern
                     if (isVariable(factElement)) {
                         if(!alphaNode.getMemory().contains(sampleID)) {
                             alphaNode.getMemory().add(sampleID);
                         }
                         if(alphaNode.getValue().size() == fact.size()) {
                             i++;
-                            //TODO: PRENDI IL PATTERN CHE METTEREBBE IN USCITA E SOSTITUISCI LE NON-VARIABILI CON LE COSTANTI CHE ERANO IN INPUT
-                            //newPattern = replaceConstants(stringToList(alphaNode.getValue().toString()), fact);
-                            //System.out.println(newPattern);
-                            
-                            //System.out.println("S" + listToString(alphaNode.getValue()));
-                            //System.out.println("A" + listFlattener(alphaNode.getValue()));
-                            //System.out.println("F" + currentFact);
-                            newPattern = replaceConstants(listFlattener(alphaNode.getValue()), currentFact);
-                            //System.out.println("R" + newPattern);
-                            findMatch(listToString(listFlattener(newPattern)), sampleID + "" + i, true);
-                            
-                            //ripeti lo stesso fatto, ma con alphaNodesFullList.get(j-k) dove c'è una variabile, k serve per selezionare value diversi per variabili diverse e viceversa
-                            //newPattern = replaceVariables(fact, alphaNodesFullList);
-                            //newPattern = replaceVariables(alphaNode.getValue(), alphaNodesFullList);
-                            //System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
+                            newPattern = replaceVariablesWithConstants(listFlattener(alphaNode.getValue()), currentFact);
+                            findMatch(listToString(newPattern), sampleID + "" + i, true);
                         }
                     }
                 }
@@ -144,7 +134,7 @@ public class Rete {
         List<List<String>> outString = new ArrayList<>();
         List<String> fullList = Arrays.asList(string.split("\\s+"));
         for (int i = 1; i < fullList.size()+2; i++) {
-            //TODO: sistemare
+            //TODO: sistemare per casi come '?x ?y ?z ; ?k ?t'
             //se non e' il carattere ";" (carattere che separa gli lhs), inserisce l'lhs nella lista (come sottolista)
             if (i%4 == 0) {
                 outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
@@ -168,38 +158,29 @@ public class Rete {
 
     //converte una stringa in lista
     private List<String> stringToList(String string) {
-        return Arrays.asList(string.split("\\s+"));        
+        return Arrays.asList(string.split("\\s+"));
     }
 
-    //sostituisce alle costanti, le costanti passate in ingresso al metodo 'findMatch' (pattern) per eseguire la ricorsione con solo le costanti cercate
-    public static List<Object> replaceConstants(List<?> list1, List<String> list2) {
-        List<Object> result = new ArrayList<>();
-        String variableName = new String();
-
-        for (int i = 0; i < list1.size(); i++) {
-            if (list2.get(i).startsWith("?")) {
-                result.add(list1.get(i));
-            } else {
-                result.add(list2.get(i));
-            }
-        }
-        return result;
-    }
-
-
-
-    //sostituisce alle variabili
-    public List<List<String>> replaceVariables(List<List<String>> list, Object value) {
-        for (List<String> innerList : list) {
-            for (int i = 0; i < innerList.size(); i++) {
-                String element = innerList.get(i);
-                if (isVariable(element)) {
-                    innerList.set(i, value.toString());
+    //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
+    private List<Object> replaceVariablesWithConstants(List<?> listWithConstants, List<String> listWithVariables) {
+        List<Object> out = new ArrayList<>();
+        Map<String, Object> variableMap = new HashMap<>();
+    
+        for (int i = 0; i < listWithConstants.size(); i++) {
+            if (isVariable(listWithVariables.get(i))) {
+                String variableName = listWithVariables.get(i).substring(1);
+                Object constantElement = listWithConstants.get(i);
+                if (variableMap.containsKey(variableName)) {
+                    out.add(variableMap.get(variableName));
+                } else {
+                    variableMap.put(variableName, constantElement);
+                    out.add(constantElement);
                 }
+            } else {
+                out.add(listWithVariables.get(i));
             }
         }
-
-        return list;
+        return out;
     }
 
     //restituisce true se la stringa in ingresso e' una variabile
@@ -239,7 +220,7 @@ public class Rete {
     }
 
     //data una lista di sottoliste restituisce una singola lista
-    public List<?> listFlattener(List<?> list) {
+    private List<?> listFlattener(List<?> list) {
         List<Object> flattenedList = new ArrayList<>();
     
         for (Object listElement : list) {
