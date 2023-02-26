@@ -8,13 +8,11 @@ public class Rete {
 
     //campi
     private List<AlphaNode> alphaNodesFullList;      //lista che contiene tutti i nodi alpha della rete
-    private List<Object> everyLhsElement;
     private List<BetaNode> betaNodesFullList;        //lista che contiene tutti i nodi beta della rete
 
     //costruttore
     public Rete() {
         this.alphaNodesFullList = new ArrayList<>();
-        this.everyLhsElement = new ArrayList<>();
         this.betaNodesFullList = new ArrayList<>();
     }
 
@@ -23,13 +21,6 @@ public class Rete {
         List<AlphaNode> alphaNodesCurrentList = new ArrayList<>();      //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
         List<BetaNode> betaNodesCurrentList = new ArrayList<>();        //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
 
-        //ogni elemento all'interno del lhs (soggetto, predicato, oggetto), lo salvo all'interno di una lista (sara' usato in 'findMatch', nel caso in cui in ingresso saranno passate variabili)
-        for (List<String> currentLhsList : lhs) {
-            for (String currentLhsElement : currentLhsList) {
-                everyLhsElement.add(currentLhsElement);
-            }
-        }
-
         //per ogni lhs creo un nodo alpha
         for (int i = 0; i < lhs.size(); i++) {
             //se esiste gia' un nodo alpha con lo stesso lhs, non ne crea un altro
@@ -37,9 +28,6 @@ public class Rete {
             if (alphaNode == null) {
                 alphaNode = new AlphaNode(Arrays.asList(lhs.get(i)));
                 alphaNodesFullList.add(alphaNode);
-
-                //TODO: sempre per il caso variabili, crea dei sotto-nodi alpha nel caso in cui questo alpha conterra' come value una variabile
-                //alphaNode.getChildren().add(new AlphaNode(null));
             }
             alphaNodesCurrentList.add(alphaNode);
         }
@@ -69,7 +57,7 @@ public class Rete {
     public void findMatch(String pattern, Object sampleID, boolean deleteMemory) {
         List<Object> newPattern = new ArrayList<>();
         List<Object> outputList = new ArrayList<>();
-        int i = -1;
+        int i = -1; //assegna ad ogni ricorsione di questo metodo un sampleID unico (ID+1 rispetto al precedente)
 
         //System.out.println("INPUT: " + pattern);
 
@@ -81,7 +69,6 @@ public class Rete {
         //per ogni elemento della tupla, metto lo stesso sampleID a tutti i nodi alpha che hanno lo stesso value del fatto 
         for(List<String> currentFact : fact) {
             for (AlphaNode alphaNode : alphaNodesFullList) {
-                
                 for (String factElement : currentFact) {
                     //TODO: sistema variabili
                     //se il fatto e' una variabile lancia ricorsivamente questo metodo per trovare tutti i possibili pattern
@@ -96,7 +83,6 @@ public class Rete {
                         }
                     }
                 }
-                //se il fatto contiene una variabile, la ricorsione converge qui
                 //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il sampleID alla memoria del nodo
                 if(alphaNode.getValue().contains(currentFact)) {
                     if(!alphaNode.getMemory().contains(sampleID)) {
