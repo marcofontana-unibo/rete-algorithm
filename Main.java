@@ -42,16 +42,22 @@ public class Main {
         String pattern4 = "TheDiamondAge is-written-by NealSpehenson ; NealSpephenson is-a science-fiction-writer";
         String pattern5 = "TheDiamondAge is-written-by NealSpehenson";
         String pattern6 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book ; TheDiamondAge is-a book";
-        String pattern7 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
-        String pattern8 = "?x ?y ?z";
-        String pattern9 = "?x ciao ?y ; ?t ?k ?w";
-        String pattern10 = "?x is-written-by WilliamGibson";
-        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10);
+        String pattern7 = "?x ?y ?z";
+        String pattern8 = "?x ?x ?x";
+        String pattern9 = "?x pattern-not-inside-rete ?x";
+        String pattern10 = "?x is-written-by ?x";
+        String pattern11 = "?x pattern-not-inside-rete ?y";
+        String pattern12 = "?x is-written-by ?y";
+        String pattern13 = "?x is-written-by ?y ; ?t ?k ?w";
+        String pattern14 = "?x is-written-by WilliamGibson";
+        String pattern15 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15);
 
         i = 0;
         for (String currentPattern : patternList) {
             i++;
             System.out.println("S" + i + ":");
+            System.out.println("INPUT: " + currentPattern);
             long start = System.nanoTime();
             rete.findMatch(currentPattern, "ID" + i, false);
             long finish = System.nanoTime();
