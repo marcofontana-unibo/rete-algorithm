@@ -104,7 +104,6 @@ public class Rete {
                             //newPattern = replaceVariables(fact, alphaNodesFullList);
                             //newPattern = replaceVariables(alphaNode.getValue(), alphaNodesFullList);
                             //System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
-                            matchFound = true;
                         }
                     }
                 }
@@ -131,7 +130,6 @@ public class Rete {
                     outputList.addAll(betaNode.getParent1().getValue());
                     outputList.addAll(betaNode.getParent2().getValue());
                     System.out.println("OUTPUT: " + listFlattener(outputList));
-                    matchFound = true;
 
                     //reset della lista
                     outputList.clear();
