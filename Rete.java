@@ -67,7 +67,6 @@ public class Rete {
     public void findMatch(String pattern, Object sampleID, boolean deleteMemory) {
         List<Object> newPattern = new ArrayList<>();
         List<Object> outputList = new ArrayList<>();
-        boolean matchFound = false;
         int i = -1;
 
         //System.out.println("INPUT: " + pattern);
@@ -115,7 +114,6 @@ public class Rete {
                     }
                     if(alphaNode.getValue().size() == fact.size()) {
                         System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
-                        matchFound = true;
                     }
                 }
             }
