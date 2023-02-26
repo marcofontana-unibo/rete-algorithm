@@ -69,27 +69,26 @@ public class Rete {
         //per ogni elemento della tupla, metto lo stesso sampleID a tutti i nodi alpha che hanno lo stesso value del fatto 
         for(List<String> currentFact : fact) {
             for (AlphaNode alphaNode : alphaNodesFullList) {
-                for (String factElement : currentFact) {
-                    //TODO: sistema variabili
-                    //se il fatto e' una variabile lancia ricorsivamente questo metodo per trovare tutti i possibili pattern
-                    if (isVariable(factElement)) {
-                        if(!alphaNode.getMemory().contains(sampleID)) {
-                            alphaNode.getMemory().add(sampleID);
-                        }
-                        if(alphaNode.getValue().size() == fact.size()) {
-                            i++;
-                            newPattern = replaceVariablesWithConstants(listFlattener(alphaNode.getValue()), currentFact);
-                            findMatch(listToString(newPattern), sampleID + "" + i, true);
-                        }
-                    }
-                }
-                //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il sampleID alla memoria del nodo
-                if(alphaNode.getValue().contains(currentFact)) {
+                //se il fatto contiene variabili, lancia ricorsivamente questo metodo con costanti al posto di variabili. La ricorsione converge al caso senza variabili
+                if (containsVariable(fact)) {
                     if(!alphaNode.getMemory().contains(sampleID)) {
                         alphaNode.getMemory().add(sampleID);
                     }
                     if(alphaNode.getValue().size() == fact.size()) {
-                        System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
+                        i++;
+                        newPattern = replaceVariablesWithConstants(listFlattener(alphaNode.getValue()), currentFact);
+                        findMatch(listToString(newPattern), sampleID + "" + i, true);
+                    }
+                //caso senza variabili
+                } else {
+                    //se il fatto non e' una variabile, se viene trovato un match con il value del nodo, viene aggiunto il sampleID alla memoria del nodo
+                    if(alphaNode.getValue().contains(currentFact)) {
+                        if(!alphaNode.getMemory().contains(sampleID)) {
+                            alphaNode.getMemory().add(sampleID);
+                        }
+                        if(alphaNode.getValue().size() == fact.size()) {
+                            System.out.println("OUTPUT: " + listFlattener(alphaNode.getValue()));
+                        }
                     }
                 }
             }
@@ -172,6 +171,18 @@ public class Rete {
     //restituisce true se la stringa in ingresso e' una variabile
     private boolean isVariable(String string) {
         return string.startsWith("?") || string.startsWith("$");
+    }
+
+    //come il metodo 'isVariable', ma controlla stringhe all'interno di liste di liste
+    private boolean containsVariable(List<List<String>> list) {
+        for (List<String> sublist : list) {
+            for (String string : sublist) {
+                if ((string.startsWith("?") || string.startsWith("$"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null

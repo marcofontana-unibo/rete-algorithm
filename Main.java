@@ -57,9 +57,10 @@ public class Main {
         String pattern15 = "?x is-written-by ?y ; ?t ?k ?w";
         String pattern16 = "?x is-written-by WilliamGibson";
         String pattern17 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
-        String pattern18 = "?x is-written-by ?y ; is-written-by ?y";
+        String pattern18 = "TheDiamondAge is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
+        String pattern19 = "?x is-written-by ?y ; is-written-by ?y";
 
-        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18);
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18, pattern19);
 
         i = 0;
         for (String currentPattern : patternList) {
