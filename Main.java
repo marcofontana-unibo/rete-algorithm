@@ -63,7 +63,7 @@ public class Main {
         String pattern7 = "?x ?y ?z";
         List<Object> expectedOutput7 = new ArrayList<>(); expectedOutput7.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, MazeOfDeath, is-written-by, PhilipKDick, PhilipKDick, is-a, science-fiction-writer, MazeOfDeath, is-a, book, PhilipKDick, is-a, book");
         String pattern8 = "?x ?y ?x";
-        List<Object> expectedOutput8 = new ArrayList<>(); expectedOutput8.add("MazeOfDeath, is-a, MazeOfDeath, PhilipKDick, is-written-by, PhilipKDick, MazeOfDeath, is-a, MazeOfDeath");
+        List<Object> expectedOutput8 = new ArrayList<>(); expectedOutput8.add("MazeOfDeath, is-a, MazeOfDeath, PhilipKDick, is-written-by, PhilipKDick");
         String pattern9 = "?x ?x ?x";
         List<Object> expectedOutput9 = new ArrayList<>(); expectedOutput9.add("");
         String pattern10 = "TheDiamondAge ?x ?y";

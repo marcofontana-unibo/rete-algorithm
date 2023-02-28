@@ -58,6 +58,7 @@ public class Rete {
         List<List<Object>> updatedPattern = new ArrayList<>();
         List<Object> newPattern = new ArrayList<>();
         List<Object> betaOutputList = new ArrayList<>();
+        List<Object> alphaOutputList = new ArrayList<>();
         List<Object> out = new ArrayList<>();
 
         //System.out.println("INPUT: " + pattern);
@@ -94,7 +95,9 @@ public class Rete {
                         }
                         //verifica che sia arrivato al termine di questo ramo della rete
                         if(alphaNode.getValue().size() == triples.size()) {
-                            return listFlattener(alphaNode.getValue());
+                            alphaOutputList.add(alphaNode.getValue());
+
+                            return listFlattener(alphaOutputList);
                         }
                     }
                 }
@@ -105,10 +108,10 @@ public class Rete {
                         betaNode.getMemory().add(sampleID);
                     }
                     //verifica che sia arrivato al termine di questo ramo della rete
-                    if (listFlattener(betaNode.getValue()).size() == triples.size()*3) {
-                        //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
-                        betaOutputList.addAll(betaNode.getParent1().getValue());
-                        betaOutputList.addAll(betaNode.getParent2().getValue());
+                    if ((listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
+                            //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
+                            betaOutputList.addAll(betaNode.getParent1().getValue());
+                            betaOutputList.addAll(betaNode.getParent2().getValue());
 
                         if (deleteMemory) {
                             deleteNodesMemory();
@@ -119,13 +122,13 @@ public class Rete {
                 }
             }
         }
-        return listFlattener(out);
+        return listFlattener(removeDuplicates(out));
     }
     
     //data una stringa in ingresso (sogg pred ogg ; ...) mette in uscita una lista con soggetto predicato e oggetto separati
     private List<List<String>> queryToList(String string) {
-        List<List<String>> outString = new ArrayList<>();
         List<String> fullList = Arrays.asList(string.split("\\s+"));
+        List<List<String>> out = new ArrayList<>();
         int found = 0;
 
         //conta le occorrenze di ";" all'interno della stringa (vd. prossime righe)
@@ -139,7 +142,7 @@ public class Rete {
         if (((found*4)+4) == fullList.size()+1) {
             for (int i = 1; i < fullList.size()+2; i++) {
                 if (i%4 == 0) {
-                    outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
+                    out.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
                 }
             }
         } else {
@@ -147,16 +150,17 @@ public class Rete {
             for (int i = 1; i < fullList.size()+2; i++) {
                 if ((i-1) % 3 == 0 && ((i-1) != 0)) {
                     if ((i-1) >= 6) {
-                        outString.add(Arrays.asList(fullList.get(0), fullList.get(i-3), fullList.get(i-2)));
+                        out.add(Arrays.asList(fullList.get(0), fullList.get(i-3), fullList.get(i-2)));
                     } else {
-                        outString.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
+                        out.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
                     }
                 }
             }
         }
-        return outString;
+        return out;
     }
     
+    //riscrive la stringa passata in input come una query
     private String queryfy(String input) {
         String[] words = input.split("\\s+");
         StringBuilder output = new StringBuilder();
@@ -201,7 +205,6 @@ public class Rete {
         return out.toString().trim();
     }
 
-    //DEVE FUNZIONARE PER LISTWITHVARIABLES.SIZE() nel ciclo for esterno
     //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
     private List<Object> replaceListVariablesWithConstants(List<?> listWithConstants, List<String> listWithVariables) {
         List<Object> out = new ArrayList<>();
@@ -249,7 +252,21 @@ public class Rete {
             out.add(outElement);
         }
         return out;
-    }   
+    }
+
+    //mette in uscita una lista che contiene solamente elementi che appaiono una unica volta nella lista in ingresso
+    private List<Object> removeDuplicates(List<Object> list) {
+        List<Object> out = new ArrayList<>();
+
+        //aggiunge alla lista di uscita elementi non inseriti prima
+        for (Object element : list) {
+            if (!out.contains(element)) {
+                out.add(element);
+            }
+        }
+
+        return out;
+    }    
 
     //restituisce true se la stringa in ingresso e' una variabile
     private boolean isVariable(String string) {
