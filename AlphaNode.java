@@ -11,10 +11,8 @@ public class AlphaNode {
         this.memory = new ArrayList<>();
     }
 
-    public void deleteMemory(Object token) {
-        if (this.memory.contains(token)) {
-            this.memory.remove(token);
-        }
+    public void deleteMemory() {
+        memory.clear();
     }
 
     //selettori
