@@ -119,7 +119,7 @@ public class Main {
             if (!testOk) {
                 System.out.println("TEST FAILED:");
                 System.out.println("OUTPUT: " + reteOutput);
-                System.out.println("EXCPTD: " + expectedOutput.get(i-1));
+                System.out.println("EXPCTD: " + expectedOutput.get(i-1));
             } else {
                 System.out.println("TEST OK!");
                 //System.out.println("OUTPUT: " + reteOutput);

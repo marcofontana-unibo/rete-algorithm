@@ -65,7 +65,7 @@ public class Rete {
         //separa soggetto predicato oggetto dalla stringa e le inserisce in una lista
         List<List<String>> triples = queryToList(pattern);
 
-        //System.out.println("TRIPLE: " + triples);
+        System.out.println("TRIPLE: " + triples);
 
         //caso in cui in ingresso ci sia una query con delle variabili
         if (containsVariable(triples)) {
@@ -128,7 +128,7 @@ public class Rete {
         List<String> fullList = Arrays.asList(string.split("\\s+"));
         int found = 0;
 
-        //conta le occorrente di ";" all'interno della stringa (vd. prossime righe)
+        //conta le occorrenze di ";" all'interno della stringa (vd. prossime righe)
         for (String currentString : fullList) {
             if (currentString.matches(";")) {
                 found++;
