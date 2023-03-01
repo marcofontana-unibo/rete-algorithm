@@ -2,16 +2,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+//memo: 1. nel caso con variabili non posso lanciare di nuovo il metodo e mettere sempre la memoria nei nodi come se fosse sempre verificato, perche' questo e' valido finche' le variabili sono tra loro tutte diverse, nel caso in cui siano uguali non funziona piu'
+//      2. bisogna prima creare la rete di nodi, perche' l'algoritmo funziona solo per lhs specificati precedentemente, e attiva il corrispondente rhs se trova il match tra tutti i lhs
+
 /*TODO LIST:
-*   SISTEMARE CASO MAP VARIABILI DIVERSE PER N TRIPLE
+* RICONTROLLA EXPECTED NEI TEST 18 A 20
+* PER S16, RICONTROLLA LE COSTANTI CHE PASSI AL METODO PER SOSTITUIRLE, OPPURE CONTROLLA SE CI SONO ERRORI CON IL METODO (DUBITO)
 */
 
 public class Main {
     public static void main(String[] args) {
+        //colori usati per vedere piu' facilmente se i test sono ok o falliti
+        final String ANSI_RED = "\u001B[31m";       //colora l'output del terminale di rosso
+        final String ANSI_GREEN = "\u001B[32m";     //colora l'output del terminale di verde
+        final String ANSI_RESET = "\u001B[0m";      //resetta il colore dell'output
+    
         Rete rete = new Rete();
         Test test = new Test();
         List<Object> reteOutput = new ArrayList<>();
-
         
         //dichiarazione antecedents
         List<String> antecedent1 = Arrays.asList("TheDiamondAge", "is-written-by","NealSpephenson");
@@ -31,7 +39,10 @@ public class Main {
         List<String> antecedent12 = Arrays.asList("MazeOfDeath","is-a","MazeOfDeath");
         List<String> antecedent13 = Arrays.asList("PhilipKDick","is-a","book");
         List<List<String>> antecedents4 = Arrays.asList(antecedent11, antecedent12, antecedent13);
-        List<List<List<String>>> antecedents = Arrays.asList(antecedents1, antecedents2, antecedents3, antecedents4);
+        List<String> antecedent14 = Arrays.asList("TheLordOfTheRings","is-directed-by","PeterJackson");
+        List<String> antecedent15 = Arrays.asList("TheLordOfTheRings","is-also-a","movie");
+        List<List<String>> antecedents5 = Arrays.asList(antecedent14, antecedent15);
+        List<List<List<String>>> antecedents = Arrays.asList(antecedents1, antecedents2, antecedents3, antecedents4, antecedents5);
         
         //creazione dei nodi
         System.out.println();
@@ -61,9 +72,9 @@ public class Main {
         String pattern6 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book ; TheDiamondAge is-a book";
         List<Object> expectedOutput6 = new ArrayList<>(); expectedOutput6.add("Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, TheDiamondAge, is-a, book");
         String pattern7 = "?x ?y ?z";
-        List<Object> expectedOutput7 = new ArrayList<>(); expectedOutput7.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, MazeOfDeath, is-written-by, PhilipKDick, PhilipKDick, is-a, science-fiction-writer, MazeOfDeath, is-a, book, PhilipKDick, is-a, book");
+        List<Object> expectedOutput7 = new ArrayList<>(); expectedOutput7.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, MazeOfDeath, is-written-by, PhilipKDick, PhilipKDick, is-a, science-fiction-writer, MazeOfDeath, is-a, book, PhilipKDick, is-a, book, TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
         String pattern8 = "?x ?y ?x";
-        List<Object> expectedOutput8 = new ArrayList<>(); expectedOutput8.add("MazeOfDeath, is-a, MazeOfDeath, PhilipKDick, is-written-by, PhilipKDick");
+        List<Object> expectedOutput8 = new ArrayList<>(); expectedOutput8.add("PhilipKDick, is-written-by, PhilipKDick, MazeOfDeath, is-a, MazeOfDeath");
         String pattern9 = "?x ?x ?x";
         List<Object> expectedOutput9 = new ArrayList<>(); expectedOutput9.add("");
         String pattern10 = "TheDiamondAge ?x ?y";
@@ -82,10 +93,18 @@ public class Main {
         List<Object> expectedOutput16 = new ArrayList<>(); expectedOutput16.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, MazeOfDeath, is-written-by, PhilipKDick, PhilipKDick, is-a, science-fiction-writer, MazeOfDeath, is-a, book");
         String pattern17 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a movie";
         List<Object> expectedOutput17 = new ArrayList<>(); expectedOutput17.add("");
-        String pattern18 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?z is-a book";
-        List<Object> expectedOutput18 = new ArrayList<>(); expectedOutput18.add("da completare");
+        String pattern18 = "TheLordOfTheRings is-directed-by PeterJackson ; is-also-a movie";
+        List<Object> expectedOutput18 = new ArrayList<>(); expectedOutput18.add("TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
+        String pattern19 = "?x is-directed-by PeterJackson ; ?y movie";
+        List<Object> expectedOutput19 = new ArrayList<>(); expectedOutput19.add("TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
+        String pattern20 = "?x is-directed-by PeterJackson ; ?x movie";
+        List<Object> expectedOutput20 = new ArrayList<>(); expectedOutput20.add("");
+        String pattern21 = "?x ?y ?z ; ?t ?k";
+        List<Object> expectedOutput21 = new ArrayList<>(); expectedOutput21.add("TheDiamondAge, is-written-by, NealSpephenson, TheDiamondAge, is-a, book");
+        String pattern22 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?z is-a book";
+        List<Object> expectedOutput22 = new ArrayList<>(); expectedOutput22.add("");
 
-        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18);
+        List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18, pattern19, pattern20, pattern21, pattern22);
         List<List<Object>> expectedOutput = new ArrayList<>();
         expectedOutput.add(expectedOutput1);
         expectedOutput.add(expectedOutput2);
@@ -105,23 +124,27 @@ public class Main {
         expectedOutput.add(expectedOutput16);
         expectedOutput.add(expectedOutput17);
         expectedOutput.add(expectedOutput18);
+        expectedOutput.add(expectedOutput19);
+        expectedOutput.add(expectedOutput20);
+        expectedOutput.add(expectedOutput21);
+        expectedOutput.add(expectedOutput22);
 
         i = 0;
         for (String currentPattern : patternList) {
             i++;
-            System.out.println("S" + i + ":");
-            System.out.println("INPUT: " + currentPattern);
             long start = System.nanoTime();
-            reteOutput = rete.findMatch(currentPattern, "ID" + i, true);
+            reteOutput = rete.findMatch(currentPattern, "ID" + i);
             long finish = System.nanoTime();
             //System.out.println("DEBUG: " + expectedOutput.get(i));
             boolean testOk = test.checkOutput(reteOutput, expectedOutput.get(i-1));
             if (!testOk) {
-                System.out.println("TEST FAILED:");
+                System.out.println(ANSI_RED + "TEST FAILED (S" + i + "):" + ANSI_RESET);
+                System.out.println("INPUT: " + currentPattern);
                 System.out.println("OUTPUT: " + reteOutput);
                 System.out.println("EXPCTD: " + expectedOutput.get(i-1));
             } else {
-                System.out.println("TEST OK!");
+                System.out.println(ANSI_GREEN + "TEST OK! (S" + i + "):" + ANSI_RESET);
+                System.out.println("INPUT: " + currentPattern);
                 //System.out.println("OUTPUT: " + reteOutput);
                 //System.out.println("EXCPTD: " + expectedOutput.get(i-1));
             }

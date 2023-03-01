@@ -57,7 +57,7 @@ public class Rete {
     }
 
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.
-    public List<Object> findMatch(String pattern, Object sampleID) {
+    public List<Object> findMatch(String pattern, Object sampleID, boolean deleteMemory) {
         List<List<Object>> updatedPattern = new ArrayList<>();
         List<Object> newPattern = new ArrayList<>();
         List<Object> betaOutputList = new ArrayList<>();
@@ -69,31 +69,32 @@ public class Rete {
         //separa soggetto predicato oggetto dalla stringa e le inserisce in una lista
         List<List<String>> triples = queryToList(pattern);
 
-        //System.out.println("TRIPLE: " + triples);
+        System.out.println("TRIPLE: " + triples);
 
         //caso in cui in ingresso ci sia una query con delle variabili
+        /*
         if (containsVariable(triples)) {
             //se il pattern in ingresso al metodo e' composto da una singola tripla
             if (triples.size() == 1) {
                 for (List<String> currentTriple : triples) {
                     for (AlphaNode alphaNode : alphaNodesFullList) {
                         newPattern = replaceListVariablesWithConstants(listFlattener(alphaNode.getValue()), currentTriple);
-                        out.add(findMatch(queryfy(listToString(newPattern)), sampleID));
+                        out.add(findMatch(queryfy(listToString(newPattern)), sampleID, deleteMemory));
                     }
                 }
             } else {
             //se il pattern in ingresso al metodo e' composto da n triple
-            //passare tutte le combinazioni di alphaNode.getValue() che posso avere a gruppi da triples.size(). (evitando ripetizioni)
                 for (AlphaNode alphaNode : alphaNodesFullList) {
                     updatedPattern = replaceListOfListsVariablesWithConstants(listFlattener(alphaNode.getValue()), triples);
-                    out.add(findMatch(queryfy(listOfListsToString(updatedPattern)), sampleID));
+                    out.add(findMatch(queryfy(listOfListsToString(updatedPattern)), sampleID, deleteMemory));
                 }
             }
         } else {
+            */
         //caso in cui non ci siano variabili in ingresso (la ricorsione del caso con variabili converge qui, perche' le variabili vengono sostituite da costanti e viene lanciato nuovamente findMatch)
             for(List<String> currentTriple : triples) {
                 for (AlphaNode alphaNode : alphaNodesFullList) {
-                    if(alphaNode.getValue().contains(currentTriple)) {
+                    if(alphaNode.getValue().contains(currentTriple) || containsVariable(triples)) {
                         if(!alphaNode.getMemory().contains(sampleID)) {
                             alphaNode.getMemory().add(sampleID);
                         }
@@ -117,16 +118,19 @@ public class Rete {
                         betaOutputList.addAll(betaNode.getParent1().getValue());
                         betaOutputList.addAll(betaNode.getParent2().getValue());
 
-                        deleteNodesMemory();
+                        if (deleteMemory) {
+                            deleteNodesMemory();
+                        }
 
                         return listFlattener(betaOutputList);
                     }
                 }
             }
+            //se non e' stato trovato alcun match, mette in uscita una lista vuota
+            return new ArrayList<>();
         }
-        //deleteNodesMemory();
-        return listFlattener(removeDuplicates(out));
-    }
+        //return listFlattener(removeDuplicates(out));
+    //}
     
     //data una stringa in ingresso (sogg pred ogg ; ...) mette in uscita una lista con soggetto predicato e oggetto separati
     private List<List<String>> queryToList(String string) {
