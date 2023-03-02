@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class Rete {
 
-    final String ANSI_COLOUR = "\u001B[34m";
+    final String ANSI_COLOR = "\u001B[34m";
     final String ANSI_RESET = "\u001B[0m";      //resetta il colore dell'output
 
     //campi
@@ -19,14 +19,14 @@ public class Rete {
         this.betaNodesFullList = new ArrayList<>();
     }
 
-    //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query)
+    //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query). addOrDeleteTriple == true --> genera i nodi con i lhs passati in ingresso; addOrDeleteTriple == false --> elimina i nodi con i lhs passati in ingresso. 
     public void updateRete(List<List<String>> lhs) {
         List<AlphaNode> alphaNodesCurrentList = new ArrayList<>();      //lista che contiene solo i nodi alpha creati durante l'esecuzione di questo metodo 
         List<BetaNode> betaNodesCurrentList = new ArrayList<>();        //lista che contiene solo i nodi beta creati durante l'esecuzione di questo metodo
 
-        //per ogni lhs creo un nodo alpha
+        //per ogni lhs creo/elimino un nodo alpha
         for (int i = 0; i < lhs.size(); i++) {
-            //se esiste gia' un nodo alpha con lo stesso lhs, non ne crea un altro
+            //controlla se esiste gia' un alpha con lo stesso value
             AlphaNode alphaNode = findAlphaValue(alphaNodesFullList, lhs.get(i));
             if (alphaNode == null) {
                 alphaNode = new AlphaNode(Arrays.asList(lhs.get(i)));
@@ -83,10 +83,11 @@ public class Rete {
                 }
             } else {
             //se il pattern in ingresso al metodo e' composto da n triple
+            //in base al numero di variabili contenute nella lista di triple, calcolo in numero di iterazioni minime da effettuare per passare il minimo numero di nodi alpha necessari a sostituire le variabili con le costanti
             //passare tutte le combinazioni di alphaNode.getValue() che posso avere a gruppi da triples.size(). (evitando ripetizioni)
                 for (AlphaNode alphaNode : alphaNodesFullList) {
                     updatedPattern = replaceListOfListsVariablesWithConstants(listFlattener(alphaNode.getValue()), triples);
-                    out.add(findMatch(queryfy(listOfListsToString(updatedPattern)), sampleID));
+                    out.add(findMatch(queryfy(listOfListsToString(updatedPattern)), sampleID));        
                 }
             }
         } else {
@@ -117,6 +118,7 @@ public class Rete {
                         betaOutputList.addAll(betaNode.getParent1().getValue());
                         betaOutputList.addAll(betaNode.getParent2().getValue());
 
+                        //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
                         deleteNodesMemory();
 
                         return listFlattener(betaOutputList);
@@ -124,10 +126,19 @@ public class Rete {
                 }
             }
         }
-        //deleteNodesMemory();
-        return listFlattener(removeDuplicates(out));
+        //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
+        List<Object> matchResult = listFlattener(removeDuplicates(out));
+
+        return matchResult;
+        //return executeRule(matchResult);
     }
     
+    //esegue la regola corrispondente al match trovato
+    private List<Object> executeRule(List<Object> matchResult) {
+        //TODO
+        return null;
+    }
+
     //data una stringa in ingresso (sogg pred ogg ; ...) mette in uscita una lista con soggetto predicato e oggetto separati
     private List<List<String>> queryToList(String string) {
         List<String> fullList = Arrays.asList(string.split("\\s+"));
@@ -260,10 +271,7 @@ public class Rete {
                     outElement.add(variables.get(i));
                 }
             }
-            
             out.add(outElement);
-            variableMap.clear();
-            constantMap.clear();
         }
 
         return out;
@@ -350,14 +358,12 @@ public class Rete {
         System.out.println("alphaNodes: " + this.alphaNodesFullList.size());
         for (AlphaNode alphaNode : alphaNodesFullList) {
             System.out.print(" Value:" + alphaNode.getValue().toString());
-            System.out.print(" Memory:" + ANSI_COLOUR + alphaNode.getMemory().toString() + ANSI_RESET);
             System.out.println();
         }
         System.out.println();
         System.out.println("betaNodes: " + this.betaNodesFullList.size());
         for (BetaNode betaNode : betaNodesFullList) {
             System.out.print(" Value:" + betaNode.getValue().toString());
-            System.out.print(" Memory:" + ANSI_COLOUR + betaNode.getMemory().toString() + ANSI_RESET);
             System.out.println();
         }
     }

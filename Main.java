@@ -100,7 +100,7 @@ public class Main {
         String pattern20 = "?x is-directed-by PeterJackson ; ?x movie";
         List<Object> expectedOutput20 = new ArrayList<>(); expectedOutput20.add("");
         String pattern21 = "?x ?y ?z ; ?t ?k";
-        List<Object> expectedOutput21 = new ArrayList<>(); expectedOutput21.add("TheDiamondAge, is-written-by, NealSpephenson, TheDiamondAge, is-a, book");
+        List<Object> expectedOutput21 = new ArrayList<>(); expectedOutput21.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
         String pattern22 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?z is-a book";
         List<Object> expectedOutput22 = new ArrayList<>(); expectedOutput22.add("");
 
