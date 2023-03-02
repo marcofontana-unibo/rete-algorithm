@@ -2,9 +2,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//memo: 1. nel caso con variabili non posso lanciare di nuovo il metodo e mettere sempre la memoria nei nodi come se fosse sempre verificato, perche' questo e' valido finche' le variabili sono tra loro tutte diverse, nel caso in cui siano uguali non funziona piu'
-//      2. bisogna prima creare la rete di nodi, perche' l'algoritmo funziona solo per lhs specificati precedentemente, e attiva il corrispondente rhs se trova il match tra tutti i lhs
-
 /*TODO LIST:
 * RICONTROLLA EXPECTED NEI TEST 18 A 20
 * PER S16, RICONTROLLA LE COSTANTI CHE PASSI AL METODO PER SOSTITUIRLE, OPPURE CONTROLLA SE CI SONO ERRORI CON IL METODO (DUBITO)
