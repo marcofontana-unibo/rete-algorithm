@@ -102,29 +102,7 @@ public class Main {
         List<Object> expectedOutput22 = new ArrayList<>(); expectedOutput22.add("");
 
         List<String> patternList = Arrays.asList(pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12, pattern13, pattern14, pattern15, pattern16, pattern17, pattern18, pattern19, pattern20, pattern21, pattern22);
-        List<List<Object>> expectedOutput = new ArrayList<>();
-        expectedOutput.add(expectedOutput1);
-        expectedOutput.add(expectedOutput2);
-        expectedOutput.add(expectedOutput3);
-        expectedOutput.add(expectedOutput4);
-        expectedOutput.add(expectedOutput5);
-        expectedOutput.add(expectedOutput6);
-        expectedOutput.add(expectedOutput7);
-        expectedOutput.add(expectedOutput8);
-        expectedOutput.add(expectedOutput9);
-        expectedOutput.add(expectedOutput10);
-        expectedOutput.add(expectedOutput11);
-        expectedOutput.add(expectedOutput12);
-        expectedOutput.add(expectedOutput13);
-        expectedOutput.add(expectedOutput14);
-        expectedOutput.add(expectedOutput15);
-        expectedOutput.add(expectedOutput16);
-        expectedOutput.add(expectedOutput17);
-        expectedOutput.add(expectedOutput18);
-        expectedOutput.add(expectedOutput19);
-        expectedOutput.add(expectedOutput20);
-        expectedOutput.add(expectedOutput21);
-        expectedOutput.add(expectedOutput22);
+        List<List<Object>> expectedOutput = Arrays.asList(expectedOutput1, expectedOutput2, expectedOutput3, expectedOutput4, expectedOutput5, expectedOutput6, expectedOutput7, expectedOutput8, expectedOutput9, expectedOutput10, expectedOutput11, expectedOutput12, expectedOutput13, expectedOutput14, expectedOutput15, expectedOutput16, expectedOutput17, expectedOutput18, expectedOutput19, expectedOutput20, expectedOutput21, expectedOutput22);
 
         i = 0;
         for (String currentPattern : patternList) {
