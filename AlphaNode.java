@@ -11,8 +11,8 @@ public class AlphaNode {
         this.memory = new ArrayList<>();
     }
 
-    public void deleteMemory() {
-        memory.clear();
+    public void deleteMemory(String sampleID) {
+        memory.remove(sampleID);
     }
 
     //selettori
