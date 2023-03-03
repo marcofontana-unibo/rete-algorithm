@@ -13,7 +13,7 @@ public class Main {
         Test test = new Test();
         List<Object> reteOutput = new ArrayList<>();
         
-        //dichiarazione antecedents
+        //nuovi dati di prova
         List<String> insertData1 = Arrays.asList("TheDiamondAge", "is-written-by","NealSpephenson");
         List<String> insertData2 = Arrays.asList("NealSpephenson","is-a","science-fiction-writer");
         List<String> insertData3 = Arrays.asList("TheDiamondAge","is-a","book");
@@ -29,7 +29,7 @@ public class Main {
         List<String> insertData13 = Arrays.asList("TheLordOfTheRings","is-also-a","movie");
         List<List<String>> insertDataList = Arrays.asList(insertData1, insertData2, insertData3, insertData4, insertData5, insertData6, insertData7, insertData8, insertData9, insertData10, insertData11, insertData12, insertData13);
         
-        //creazione dei nodi
+        //creazione rete
         System.out.println();
         System.out.println("-----RETE-----");
         int i = 0;
@@ -42,7 +42,7 @@ public class Main {
         }
         System.out.println();
         
-        //mette in uscita tutte le tuple (pattern) tra quelle dentro rete che rispettano il match
+        //dichiarazione test
         System.out.println("-----TEST-----");
         String query1 = "TheDiamondAge is-written-by NealSpephenson ; NealSpephenson is-a science-fiction-writer ; TheDiamondAge is-a book";
         List<Object> expectedOutput1 = new ArrayList<>(); expectedOutput1.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book");
@@ -88,6 +88,7 @@ public class Main {
         List<String> queryList = Arrays.asList(query1, query2, query3, query4, query5, query6, query7, query8, query9, query10, query11, query12, query13, query14, query15, query16, query17, query18, query19, query20);
         List<List<Object>> expectedOutput = Arrays.asList(expectedOutput1, expectedOutput2, expectedOutput3, expectedOutput4, expectedOutput5, expectedOutput6, expectedOutput7, expectedOutput8, expectedOutput9, expectedOutput10, expectedOutput11, expectedOutput12, expectedOutput13, expectedOutput14, expectedOutput15, expectedOutput16, expectedOutput17, expectedOutput18, expectedOutput19, expectedOutput20);
 
+        //esecuzione test
         i = 0;
         for (String currentPattern : queryList) {
             i++;

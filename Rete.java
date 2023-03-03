@@ -17,13 +17,19 @@ public class Rete {
 
     //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query). addOrDeleteTriple == true --> genera i nodi con i lhs passati in ingresso; addOrDeleteTriple == false --> elimina i nodi con i lhs passati in ingresso. 
     public void updateRete(List<String> lhs, boolean addOrRemoveTriple) {
+
+        //rimuove nodi alpha
         if (!addOrRemoveTriple) {
+
             //controlla se esiste gia' un alpha con lo stesso value (LHS), se esiste lo elimina
             AlphaNode alphaNode = findAlphaValue(alphaNodesFullList, lhs);
             if (alphaNode != null) {
                 alphaNode = null;   //metto l'oggetto a null in modo che possa essere raccolto dal garbage collector
             }
+
+        //aggiunge nodi alpha
         } else {
+
             //controlla se esiste gia' un alpha con lo stesso value (LHS), se non esiste ne crea uno
             AlphaNode alphaNode = findAlphaValue(alphaNodesFullList, lhs);
             if (alphaNode == null) {
@@ -48,8 +54,9 @@ public class Rete {
 
         //System.out.println("TRIPLE: " + triples);
 
-        //caso in cui in ingresso ci sia una query con delle variabili
+        //CASO 1: caso in cui in ingresso ci sia una query con delle variabili
         if (containsVariable(triples)) {
+
             //se il pattern in ingresso al metodo e' composto da una singola tripla
             if (triples.size() == 1) {
                 for (List<String> currentTriple : triples) {
@@ -59,6 +66,7 @@ public class Rete {
                     }
                 }
             } else {
+
                 //se il pattern in ingresso al metodo e' composto da n triple
                 for (AlphaNode alphaNode : alphaNodesFullList) {
                     updatedPattern = replaceListOfListsVariablesWithConstants(listFlattener(alphaNode.getValue()), triples);
@@ -66,14 +74,19 @@ public class Rete {
                 }
             }
         } else {
-        //caso in cui non ci siano variabili in ingresso (la ricorsione del caso con variabili converge qui, perche' le variabili vengono sostituite da costanti e viene lanciato nuovamente findMatch)
+            //CASO 2: caso in cui non ci siano variabili in ingresso (la ricorsione del caso con variabili converge qui)
+
+            //NODI ALPHA
             for(List<String> currentTriple : triples) {
                 for (AlphaNode alphaNode : alphaNodesFullList) {
+                    
+                    //assegnamento sampleID a memoria nodi alpha
                     if(alphaNode.getValue().contains(currentTriple)) {
                         if(!alphaNode.getMemory().contains(sampleID)) {
                             alphaNode.getMemory().add(sampleID);
                         }
-                        //verifica che sia arrivato al termine di questo ramo della rete
+
+                        //se e' arrivato al termine di questo ramo della rete restituisce il pattern trovato
                         if(alphaNode.getValue().size() == triples.size()) {
                             alphaOutputList.add(alphaNode.getValue());
 
@@ -82,13 +95,22 @@ public class Rete {
                     }
                 }
             }
+
+            //NODI BETA
             int alphaIndex = -1, found = 0, betaIndex = -1;
             List<BetaNode> betaNodesCurrentList = new ArrayList<>();
+
             for (int i = 0; i < alphaNodesFullList.size(); i++) {
+
+                //cerca il primo nodo alpha che contiene il sampleID in memoria
                 if (found == 0 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
                     alphaIndex = i;
                     found++;
+
+                //cerca il secondo
                 } else if (found == 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
+
+                    //creazione di un nodo beta con genitori due alpha
                     BetaNode betaNode = new BetaNode(Arrays.asList(alphaNodesFullList.get(alphaIndex).getValue(), alphaNodesFullList.get(i).getValue()), alphaNodesFullList.get(alphaIndex), alphaNodesFullList.get(i));
                     betaNode.getMemory().add(sampleID);
                     betaNodesCurrentList.add(betaNode);
@@ -96,7 +118,7 @@ public class Rete {
                     betaIndex++;
                     found++;
 
-                    //verifica che sia arrivato al termine di questo ramo della rete
+                    //se e' arrivato al termine di questo ramo della rete restituisce il pattern trovato
                     if ((listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
                         //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                         betaOutputList.addAll(betaNode.getParent1().getValue());
@@ -107,7 +129,11 @@ public class Rete {
 
                         return listFlattener(betaOutputList);
                     }
+
+                //cerca il terzo o oltre
                 } else if (found > 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
+
+                    //creazione di un nodo beta con genitori un beta e un alpha
                     BetaNode betaNode = new BetaNode(Arrays.asList(betaNodesCurrentList.get(betaIndex).getValue(), alphaNodesFullList.get(i).getValue()), betaNodesCurrentList.get(betaIndex), alphaNodesFullList.get(i));
                     betaNode.getMemory().add(sampleID);
                     betaNodesCurrentList.add(betaNode);
@@ -129,6 +155,8 @@ public class Rete {
                 }
             }
         }
+
+        //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
         deleteNodesMemory(sampleID.toString());
 
         //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
@@ -140,11 +168,11 @@ public class Rete {
 
     //esegue la regola corrispondente al match trovato
     //private List<Object> executeRule(List<Object> matchResult) {
-        //TODO
+        //TODO: vd. INSTANS
     //    return null;
     //}
 
-    //data una stringa in ingresso (sogg pred ogg ; ...) mette in uscita una lista con soggetto predicato e oggetto separati
+    //data una stringa che rappresenta una query mette in uscita una lista dove ogni elemento e' composto da soggetto predicato e oggetto
     private List<List<String>> queryToList(String string) {
         List<String> fullList = Arrays.asList(string.split("\\s+"));
         List<List<String>> out = new ArrayList<>();
@@ -208,7 +236,7 @@ public class Rete {
         return out;
     }
 
-    //converte una lista in una stringa
+    //converte una lista di liste in una stringa
     private String listOfListsToString(List<List<Object>> list) {
         StringBuilder out = new StringBuilder();
         for (List<?> sublist : list) {
@@ -250,6 +278,7 @@ public class Rete {
         return out;
     }
 
+    //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
     private List<List<Object>> replaceListOfListsVariablesWithConstants(List<?> listWithConstants, List<List<String>> listWithVariables) {
         List<List<Object>> out = new ArrayList<>();
         Map<String, Object> variableMap = new HashMap<>();
@@ -338,7 +367,7 @@ public class Rete {
         }
     }
 
-    //data una lista di sottoliste restituisce una singola lista
+    //data una lista di liste restituisce una singola lista
     private List<Object> listFlattener(List<?> list) {
         List<Object> flattenedList = new ArrayList<>();
     
@@ -374,10 +403,6 @@ public class Rete {
 
     public int getNumBetaNodes() {
         return this.betaNodesFullList.size();
-    }
-
-    public int getNumTotNodes() {
-        return getNumAlphaNodes() + getNumBetaNodes();
     }
 
     public List<AlphaNode> getAlphaNodesList() {
