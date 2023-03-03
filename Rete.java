@@ -111,10 +111,13 @@ public class Rete {
                 } else if (found == 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
 
                     //creazione di un nodo beta con genitori due alpha
-                    BetaNode betaNode = new BetaNode(Arrays.asList(alphaNodesFullList.get(alphaIndex).getValue(), alphaNodesFullList.get(i).getValue()), alphaNodesFullList.get(alphaIndex), alphaNodesFullList.get(i));
+                    BetaNode betaNode = findBetaValue(Arrays.asList(alphaNodesFullList.get(alphaIndex).getValue(), alphaNodesFullList.get(i).getValue()));
+                    if (betaNode == null) {
+                        betaNode = new BetaNode(Arrays.asList(alphaNodesFullList.get(alphaIndex).getValue(), alphaNodesFullList.get(i).getValue()), alphaNodesFullList.get(alphaIndex), alphaNodesFullList.get(i));
+                        betaNodesFullList.add(betaNode);
+                    }
                     betaNode.getMemory().add(sampleID);
                     betaNodesCurrentList.add(betaNode);
-                    //betaNodesFullList.add(betaNode);
                     betaIndex++;
                     found++;
 
@@ -134,10 +137,13 @@ public class Rete {
                 } else if (found > 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
 
                     //creazione di un nodo beta con genitori un beta e un alpha
-                    BetaNode betaNode = new BetaNode(Arrays.asList(betaNodesCurrentList.get(betaIndex).getValue(), alphaNodesFullList.get(i).getValue()), betaNodesCurrentList.get(betaIndex), alphaNodesFullList.get(i));
+                    BetaNode betaNode = findBetaValue(Arrays.asList(betaNodesCurrentList.get(betaIndex).getValue(), alphaNodesFullList.get(i).getValue()));
+                    if (betaNode == null) {
+                        betaNode = new BetaNode(Arrays.asList(betaNodesCurrentList.get(betaIndex).getValue(), alphaNodesFullList.get(i).getValue()), betaNodesCurrentList.get(betaIndex), alphaNodesFullList.get(i));
+                        betaNodesFullList.add(betaNode);
+                    }
                     betaNode.getMemory().add(sampleID);
                     betaNodesCurrentList.add(betaNode);
-                    //betaNodesFullList.add(betaNode);
                     betaIndex++;
                     found++;
 
@@ -344,7 +350,6 @@ public class Rete {
         return null;
     }
 
-    /*
     //restituisce il nodo beta che contiene tutti i lhs specificati. Altrimenti restituisce null
     private BetaNode findBetaValue(List<Object> value) {
         for (BetaNode betaNode : betaNodesFullList) {
@@ -354,7 +359,6 @@ public class Rete {
         }
         return null;
     }
-    */
 
     //elimina il sampleID dai nodi che lo contengono
     private void deleteNodesMemory(String sampleID) {
