@@ -2,11 +2,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/*TODO LIST:
-* RICONTROLLA EXPECTED NEI TEST 18 A 20
-* PER S16, RICONTROLLA LE COSTANTI CHE PASSI AL METODO PER SOSTITUIRLE, OPPURE CONTROLLA SE CI SONO ERRORI CON IL METODO (DUBITO)
-*/
-
 public class Main {
     public static void main(String[] args) {
         //colori usati per vedere piu' facilmente se i test sono ok o falliti
