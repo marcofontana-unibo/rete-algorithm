@@ -1,0 +1,2 @@
+a differenza di instans, il mio algoritmo non mette la memoria del singolo elemento della variabile nel nodo, ma mette il sample associato alla tripla (quando dalla dashboard si fa "insert data" gli associa un sampleID unico) e usa quello.
+il sampleID nel mio caso serve per non riutilizzare i nodi alpha e beta, ma utilizzare quelli gia' esistenti. Nel loro caso era per preparare gia' la rete di nodi con le uscite pronte

@@ -15,14 +15,14 @@ public class Rete {
         this.betaNodesFullList = new ArrayList<>();
     }
 
-    //genera la rete di nodi a partire dagli lhs passati in ingresso (le condizioni della query). addOrDeleteTriple == true --> genera i nodi con i lhs passati in ingresso; addOrDeleteTriple == false --> elimina i nodi con i lhs passati in ingresso. 
-    public void updateRete(List<String> lhs, boolean addOrRemoveTriple) {
+    //genera / rimuove nodi alpha. Se addTriple == true, allora crea i nodi, se addTriple == false, li elimina 
+    public void updateRete(List<String> triple, boolean addTriple) {
 
         //rimuove nodi alpha
-        if (!addOrRemoveTriple) {
+        if (!addTriple) {
 
             //controlla se esiste gia' un alpha con lo stesso value (LHS), se esiste lo elimina
-            AlphaNode alphaNode = findAlphaValue(alphaNodesFullList, lhs);
+            AlphaNode alphaNode = findAlphaValue(triple);
             if (alphaNode != null) {
                 alphaNode = null;   //metto l'oggetto a null in modo che possa essere raccolto dal garbage collector
             }
@@ -31,9 +31,9 @@ public class Rete {
         } else {
 
             //controlla se esiste gia' un alpha con lo stesso value (LHS), se non esiste ne crea uno
-            AlphaNode alphaNode = findAlphaValue(alphaNodesFullList, lhs);
+            AlphaNode alphaNode = findAlphaValue(triple);
             if (alphaNode == null) {
-                alphaNode = new AlphaNode(Arrays.asList(lhs));
+                alphaNode = new AlphaNode(Arrays.asList(triple));
                 alphaNodesFullList.add(alphaNode);
             }
         }
@@ -341,8 +341,8 @@ public class Rete {
     }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null
-    private AlphaNode findAlphaValue(List<AlphaNode> nodeList, Object value) {
-        for (AlphaNode node : nodeList) {
+    private AlphaNode findAlphaValue(Object value) {
+        for (AlphaNode node : alphaNodesFullList) {
             if (node.getValue().contains(value)) {
                 return node;
             }
