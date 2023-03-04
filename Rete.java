@@ -1,6 +1,6 @@
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;  //libreria per generare token che sono garantiti essere unici 
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ public class Rete {
     private List<AlphaNode> alphaNodesFullList;     //lista che contiene tutti i nodi alpha della rete
     private List<BetaNode> betaNodesFullList;       //lista che contiene tutti i nodi beta della rete
     private List<Integer> alphaNodesToSkip;         //lista in cui vengono salvati gli indici dei nodi alpha da evitare durante la ricerca del pattern, in modo da ottimizzare
-    private Map<String, Object> tokenMap;           
+    private Map<String, Integer> tokenMap;           
 
 
     //costruttore
@@ -47,10 +47,7 @@ public class Rete {
 
     public List<List<Object>> findMatch(String pattern) {
         Object sampleID = tokenization(pattern);
-        //System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAA" + queryToList(pattern).size());
         return checkOutput(listToListOfLists(findMatch(pattern, sampleID), 3), queryToList(pattern));
-        //return listToListOfLists(findMatch(pattern, sampleID), 3);
-        //TODO: mettere in altro ingresso che separa nella lista di liste i risultati (se produce piu' di un risultato)
     }
 
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.
@@ -184,14 +181,11 @@ public class Rete {
             }
         }
 
+        //essendo questa variabile un campo della classe rete, non viene mai resettata, bisogna resettarla ogni volta che sta per terminare l'esecuzione del metodo 'findMatch'
         alphaNodesToSkip.clear();
-        //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
-        //deleteNodesMemory(sampleID.toString());
 
         //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
         List<Object> matchResult = listFlattener(removeDoubles(out));
-
-        //executeRule(matchResult)
         
         return matchResult;
     }
@@ -416,13 +410,20 @@ public class Rete {
         return false;
     }
 
-    //genera un token unico in base alla stringa in ingresso
-    private Object tokenization(String string) {
+    //genera un token unico da usare come ID nella memoria dei nodi
+    private int tokenization(String string) {
+        Random random = new Random();
+        int token = 0;
+
         if (this.tokenMap.containsKey(string)) {
             return this.tokenMap.get(string);
+
         } else {
-            //TODO: genera un token che e' garantito essere unico. Il token generato e' da 128 bit, 36 caratteri, esadecimale, essendo molto lungo potrebbe causare ritardi. Usare token piu' corti?
-            UUID token = UUID.randomUUID();
+
+            do {
+                token = random.nextInt(10_000_000);
+            } while (tokenMap.containsValue(token));
+
             this.tokenMap.put(string, token);
         }
         //System.out.println(this.tokenMap);
