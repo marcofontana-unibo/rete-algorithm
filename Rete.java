@@ -370,7 +370,7 @@ public class Rete {
         return out;
     }
 
-    //controlla che la lista in uscita abbia la stessa dimensione di quella in ingresso, se non e' così restituisce una lista vuota
+    //controlla che la lista 'listToCheck' abbia le stringhe che non contengono variabili uguali e nelle stesse posizioni di quelle della lista 'inputList'. Se non e' rispettato restituisce una lista vuota, altrimenti restituisce la lista
     private List<List<Object>> checkOutput(List<List<Object>> listToCheck, List<List<String>> inputList) {
 
         if (listToCheck.isEmpty()) {
@@ -385,7 +385,7 @@ public class Rete {
             }
             for (Object currentCheckElement : currentCheckList) {
                 j++;
-                if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("?"))) {
+                if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("$"))) {
                     if (!currentCheckElement.toString().equals(inputList.get(i).get(j))) {
                         //lista vuota
                         return new ArrayList<>();
