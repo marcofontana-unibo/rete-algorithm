@@ -1,18 +1,24 @@
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;  //libreria per generare token che sono garantiti essere unici 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class Rete {
     //campi
-    private List<AlphaNode> alphaNodesFullList;      //lista che contiene tutti i nodi alpha della rete
-    private List<BetaNode> betaNodesFullList;        //lista che contiene tutti i nodi beta della rete
+    private List<AlphaNode> alphaNodesFullList;     //lista che contiene tutti i nodi alpha della rete
+    private List<BetaNode> betaNodesFullList;       //lista che contiene tutti i nodi beta della rete
+    private List<Integer> alphaNodesToSkip;         //lista in cui vengono salvati gli indici dei nodi alpha da evitare durante la ricerca del pattern, in modo da ottimizzare
+    private Map<String, Object> tokenMap;           
+
 
     //costruttore
     public Rete() {
         this.alphaNodesFullList = new ArrayList<>();
         this.betaNodesFullList = new ArrayList<>();
+        this.tokenMap = new HashMap<>();
+        this.alphaNodesToSkip = new ArrayList<>();
     }
 
     //genera / rimuove nodi alpha. Se addTriple == true, allora crea i nodi, se addTriple == false, li elimina 
@@ -39,8 +45,16 @@ public class Rete {
         }
     }
 
+    public List<List<Object>> findMatch(String pattern) {
+        Object sampleID = tokenization(pattern);
+        //System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAA" + queryToList(pattern).size());
+        return checkOutput(listToListOfLists(findMatch(pattern, sampleID), 3), queryToList(pattern));
+        //return listToListOfLists(findMatch(pattern, sampleID), 3);
+        //TODO: mettere in altro ingresso che separa nella lista di liste i risultati (se produce piu' di un risultato)
+    }
+
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.
-    public List<Object> findMatch(String pattern, Object sampleID) {
+    private List<Object> findMatch(String pattern, Object sampleID) {
         List<List<Object>> updatedPattern = new ArrayList<>();
         List<Object> newPattern = new ArrayList<>();
         List<Object> betaOutputList = new ArrayList<>();
@@ -103,12 +117,13 @@ public class Rete {
             for (int i = 0; i < alphaNodesFullList.size(); i++) {
 
                 //cerca il primo nodo alpha che contiene il sampleID in memoria
-                if (found == 0 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
+                if (found == 0 && alphaNodesFullList.get(i).getMemory().contains(sampleID) && !alphaNodesToSkip.contains(i)) {
+                    alphaNodesToSkip.add(i);
                     alphaIndex = i;
                     found++;
 
                 //cerca il secondo
-                } else if (found == 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
+                } else if (found == 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID) && !alphaNodesToSkip.contains(i)) {
 
                     //creazione di un nodo beta con genitori due alpha
                     BetaNode betaNode = findBetaValue(Arrays.asList(alphaNodesFullList.get(alphaIndex).getValue(), alphaNodesFullList.get(i).getValue()));
@@ -116,9 +131,13 @@ public class Rete {
                         betaNode = new BetaNode(Arrays.asList(alphaNodesFullList.get(alphaIndex).getValue(), alphaNodesFullList.get(i).getValue()), alphaNodesFullList.get(alphaIndex), alphaNodesFullList.get(i));
                         betaNodesFullList.add(betaNode);
                     }
-                    betaNode.getMemory().add(sampleID);
+                    if (!betaNode.getMemory().contains(sampleID)) {
+                        betaNode.getMemory().add(sampleID);
+
+                    }
                     betaNodesCurrentList.add(betaNode);
-                    betaIndex++;
+                    alphaNodesToSkip.add(i);
+                    betaIndex = 0;
                     found++;
 
                     //se e' arrivato al termine di questo ramo della rete restituisce il pattern trovato
@@ -134,7 +153,7 @@ public class Rete {
                     }
 
                 //cerca il terzo o oltre
-                } else if (found > 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID)) {
+                } else if (found > 1 && alphaNodesFullList.get(i).getMemory().contains(sampleID) && !alphaNodesToSkip.contains(i)) {
 
                     //creazione di un nodo beta con genitori un beta e un alpha
                     BetaNode betaNode = findBetaValue(Arrays.asList(betaNodesCurrentList.get(betaIndex).getValue(), alphaNodesFullList.get(i).getValue()));
@@ -142,8 +161,11 @@ public class Rete {
                         betaNode = new BetaNode(Arrays.asList(betaNodesCurrentList.get(betaIndex).getValue(), alphaNodesFullList.get(i).getValue()), betaNodesCurrentList.get(betaIndex), alphaNodesFullList.get(i));
                         betaNodesFullList.add(betaNode);
                     }
-                    betaNode.getMemory().add(sampleID);
+                    if (!betaNode.getMemory().contains(sampleID)) {
+                        betaNode.getMemory().add(sampleID);
+                    }
                     betaNodesCurrentList.add(betaNode);
+                    alphaNodesToSkip.add(i);
                     betaIndex++;
                     found++;
 
@@ -162,11 +184,12 @@ public class Rete {
             }
         }
 
+        alphaNodesToSkip.clear();
         //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
-        deleteNodesMemory(sampleID.toString());
+        //deleteNodesMemory(sampleID.toString());
 
         //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
-        List<Object> matchResult = listFlattener(removeDuplicates(out));
+        List<Object> matchResult = listFlattener(removeDoubles(out));
 
         //executeRule(matchResult)
         
@@ -243,6 +266,29 @@ public class Rete {
         return out;
     }
 
+    //converte una lista in una lista di liste dove ogni elemento sono 'num' elementi della lista di partenza
+    private List<List<Object>> listToListOfLists(List<Object> list, int num) {
+        if (num <= 0) {
+            throw new IllegalArgumentException("num must be > 0");
+        }
+
+        List<List<Object>> result = new ArrayList<>();
+        List<Object> tmpList = new ArrayList<>();
+        
+        for (int i = 0; i < list.size(); i++) {
+            tmpList.add(list.get(i));
+            if (tmpList.size() == num) {
+                result.add(tmpList);
+                tmpList = new ArrayList<>();
+            }
+        }
+        if (!tmpList.isEmpty()) {
+            result.add(tmpList);
+        }
+        return result;
+    }
+    
+
     //converte una lista di liste in una stringa
     private String listOfListsToString(List<List<Object>> list) {
         StringBuilder out = new StringBuilder();
@@ -311,7 +357,7 @@ public class Rete {
     }
     
     //mette in uscita una lista che contiene solamente elementi che appaiono una unica volta nella lista in ingresso
-    private List<Object> removeDuplicates(List<Object> list) {
+    private List<Object> removeDoubles(List<Object> list) {
         List<Object> out = new ArrayList<>();
 
         //aggiunge alla lista di uscita elementi non gia' inseriti prima
@@ -322,7 +368,36 @@ public class Rete {
         }
 
         return out;
-    }    
+    }
+
+    //controlla che la lista in uscita abbia la stessa dimensione di quella in ingresso, se non e' così restituisce una lista vuota
+    private List<List<Object>> checkOutput(List<List<Object>> listToCheck, List<List<String>> inputList) {
+
+        if (listToCheck.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        int i = -1, j = -1;
+        for (List<Object> currentCheckList : listToCheck) {
+            i++;
+            if (i == inputList.size()) {
+                i = 0;
+            }
+            for (Object currentCheckElement : currentCheckList) {
+                j++;
+                if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("?"))) {
+                    if (!currentCheckElement.toString().equals(inputList.get(i).get(j))) {
+                        //lista vuota
+                        return new ArrayList<>();
+                    }
+                }
+                if (j == 2) {
+                    j = -1;
+                }
+            }
+        }
+        return listToCheck;
+    }
 
     //restituisce true se la stringa in ingresso e' una variabile
     private boolean isVariable(String string) {
@@ -339,6 +414,19 @@ public class Rete {
             }
         }
         return false;
+    }
+
+    //genera un token unico in base alla stringa in ingresso
+    private Object tokenization(String string) {
+        if (this.tokenMap.containsKey(string)) {
+            return this.tokenMap.get(string);
+        } else {
+            //TODO: genera un token che e' garantito essere unico. Il token generato e' da 128 bit, 36 caratteri, esadecimale, essendo molto lungo potrebbe causare ritardi. Usare token piu' corti?
+            UUID token = UUID.randomUUID();
+            this.tokenMap.put(string, token);
+        }
+        //System.out.println(this.tokenMap);
+        return this.tokenMap.get(string);
     }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null

@@ -11,11 +11,10 @@ public class Main {
     
         Rete rete = new Rete();
         Test test = new Test();
-        List<Object> reteOutput = new ArrayList<>();
         
         //nuovi dati di prova
-        List<String> insertData1 = Arrays.asList("TheDiamondAge", "is-written-by","NealSpephenson");
-        List<String> insertData2 = Arrays.asList("NealSpephenson","is-a","science-fiction-writer");
+        List<String> insertData1 = Arrays.asList("TheDiamondAge", "is-written-by","NealStephenson");
+        List<String> insertData2 = Arrays.asList("NealStephenson","is-a","science-fiction-writer");
         List<String> insertData3 = Arrays.asList("TheDiamondAge","is-a","book");
         List<String> insertData4 = Arrays.asList("Neuromancer", "is-written-by","WilliamGibson");
         List<String> insertData5 = Arrays.asList("WilliamGibson","is-a","science-fiction-writer");
@@ -44,36 +43,36 @@ public class Main {
         
         //dichiarazione test
         System.out.println("-----TEST-----");
-        String                  query1 = "TheDiamondAge is-written-by NealSpephenson ; NealSpephenson is-a science-fiction-writer ; TheDiamondAge is-a book";
+        String                  query1 = "TheDiamondAge is-written-by NealStephenson ; NealStephenson is-a science-fiction-writer ; TheDiamondAge is-a book";
         List<Object>    expectedOutput1 = new ArrayList<>(); 
-                        expectedOutput1.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book");
+                        expectedOutput1.add("[TheDiamondAge, is-written-by, NealStephenson], [NealStephenson, is-a, science-fiction-writer], [TheDiamondAge, is-a, book]");
         String                  query2 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book";
         List<Object>    expectedOutput2 = new ArrayList<>(); 
-                        expectedOutput2.add("Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book");
+                        expectedOutput2.add("[Neuromancer, is-written-by, WilliamGibson], [WilliamGibson, is-a, science-fiction-writer], [Neuromancer, is-a, book]");
         String                  query3 = "pattern not-inside rete";
         List<Object>    expectedOutput3 = new ArrayList<>(); 
                         expectedOutput3.add("");
-        String                  query4 = "TheDiamondAge is-written-by NealSpephenson ; NealSpephenson is-a science-fiction-writer";
+        String                  query4 = "TheDiamondAge is-written-by NealStephenson ; NealStephenson is-a science-fiction-writer";
         List<Object>    expectedOutput4 = new ArrayList<>(); 
-                        expectedOutput4.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer");
-        String                  query5 = "TheDiamondAge is-written-by NealSpephenson";
+                        expectedOutput4.add("[TheDiamondAge, is-written-by, NealStephenson], [NealStephenson, is-a, science-fiction-writer]");
+        String                  query5 = "TheDiamondAge is-written-by NealStephenson";
         List<Object>    expectedOutput5 = new ArrayList<>(); 
-                        expectedOutput5.add("TheDiamondAge, is-written-by, NealSpephenson");
+                        expectedOutput5.add("[TheDiamondAge, is-written-by, NealStephenson]");
         String                  query6 = "Neuromancer is-written-by WilliamGibson ; WilliamGibson is-a science-fiction-writer ; Neuromancer is-a book";
         List<Object>    expectedOutput6 = new ArrayList<>(); 
-                        expectedOutput6.add("Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book");
+                        expectedOutput6.add("[Neuromancer, is-written-by, WilliamGibson], [WilliamGibson, is-a, science-fiction-writer], [Neuromancer, is-a, book]");
         String                  query7 = "?x ?y ?z";
         List<Object>    expectedOutput7 = new ArrayList<>(); 
-                        expectedOutput7.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, MazeOfDeath, is-written-by, PhilipKDick, PhilipKDick, is-a, science-fiction-writer, MazeOfDeath, is-a, book, Apple, is-a, Fruit, TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
+                        expectedOutput7.add("[TheDiamondAge, is-written-by, NealStephenson], [NealStephenson, is-a, science-fiction-writer], [TheDiamondAge, is-a, book], [Neuromancer, is-written-by, WilliamGibson], [WilliamGibson, is-a, science-fiction-writer], [Neuromancer, is-a, book], [MazeOfDeath, is-written-by, PhilipKDick], [PhilipKDick, is-a, science-fiction-writer], [MazeOfDeath, is-a, book], [Apple, is-a, Fruit], [TheLordOfTheRings, is-directed-by, PeterJackson], [TheLordOfTheRings, is-also-a, movie]");
         String                  query8 = "?x ?y ?x";
         List<Object>    expectedOutput8 = new ArrayList<>(); 
-                        expectedOutput8.add("Apple, is-a, Apple");
+                        expectedOutput8.add("[Apple, is-a, Apple]");
         String                  query9 = "?x ?x ?x";
         List<Object>    expectedOutput9 = new ArrayList<>(); 
                         expectedOutput9.add("");
         String                  query10 = "TheDiamondAge ?x ?y";
         List<Object>    expectedOutput10 = new ArrayList<>(); 
-                        expectedOutput10.add("TheDiamondAge, is-written-by, NealSpephenson, TheDiamondAge, is-a, book");
+                        expectedOutput10.add("[TheDiamondAge, is-written-by, NealStephenson], [TheDiamondAge, is-a, book]");
         String                  query11 = "?x pattern-not-inside-rete ?x";
         List<Object>    expectedOutput11 = new ArrayList<>(); 
                         expectedOutput11.add("");
@@ -82,25 +81,25 @@ public class Main {
                         expectedOutput12.add("");
         String                  query13 = "?x is-a ?x";
         List<Object>    expectedOutput13 = new ArrayList<>(); 
-                        expectedOutput13.add("Apple, is-a, Apple");
+                        expectedOutput13.add("[Apple, is-a, Apple]");
         String                  query14 = "?x is-written-by ?y";
         List<Object>    expectedOutput14 = new ArrayList<>(); 
-                        expectedOutput14.add("TheDiamondAge, is-written-by, NealSpephenson, Neuromancer, is-written-by, WilliamGibson, MazeOfDeath, is-written-by, PhilipKDick");
+                        expectedOutput14.add("[TheDiamondAge, is-written-by, NealStephenson], [Neuromancer, is-written-by, WilliamGibson], [MazeOfDeath, is-written-by, PhilipKDick]");
         String                  query15 = "?x is-written-by WilliamGibson";
         List<Object>    expectedOutput15 = new ArrayList<>(); 
-                        expectedOutput15.add("Neuromancer, is-written-by, WilliamGibson");
+                        expectedOutput15.add("[Neuromancer, is-written-by, WilliamGibson]");
         String                  query16 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a book";
         List<Object>    expectedOutput16 = new ArrayList<>(); 
-                        expectedOutput16.add("TheDiamondAge, is-written-by, NealSpephenson, NealSpephenson, is-a, science-fiction-writer, TheDiamondAge, is-a, book, Neuromancer, is-written-by, WilliamGibson, WilliamGibson, is-a, science-fiction-writer, Neuromancer, is-a, book, MazeOfDeath, is-written-by, PhilipKDick, PhilipKDick, is-a, science-fiction-writer, MazeOfDeath, is-a, book");
+                        expectedOutput16.add("[TheDiamondAge, is-written-by, NealStephenson], [NealStephenson, is-a, science-fiction-writer], [TheDiamondAge, is-a, book], [Neuromancer, is-written-by, WilliamGibson], [WilliamGibson, is-a, science-fiction-writer], [Neuromancer, is-a, book], [MazeOfDeath, is-written-by, PhilipKDick], [PhilipKDick, is-a, science-fiction-writer], [MazeOfDeath, is-a, book]");
         String                  query17 = "?x is-written-by ?y ; ?y is-a science-fiction-writer ; ?x is-a movie";
         List<Object>    expectedOutput17 = new ArrayList<>(); 
                         expectedOutput17.add("");
         String                  query18 = "TheLordOfTheRings is-directed-by PeterJackson ; is-also-a movie";
         List<Object>    expectedOutput18 = new ArrayList<>(); 
-                        expectedOutput18.add("TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
+                        expectedOutput18.add("[TheLordOfTheRings, is-directed-by, PeterJackson], [TheLordOfTheRings, is-also-a, movie]");
         String                  query19 = "?x is-directed-by PeterJackson ; ?y movie";
         List<Object>    expectedOutput19 = new ArrayList<>(); 
-                        expectedOutput19.add("TheLordOfTheRings, is-directed-by, PeterJackson, TheLordOfTheRings, is-also-a, movie");
+                        expectedOutput19.add("[TheLordOfTheRings, is-directed-by, PeterJackson], [TheLordOfTheRings, is-also-a, movie]");
         String                  query20 = "?x is-directed-by PeterJackson ; ?x movie";
         List<Object>    expectedOutput20 = new ArrayList<>(); 
                         expectedOutput20.add("");
@@ -109,14 +108,15 @@ public class Main {
         List<List<Object>> expectedOutput = Arrays.asList(expectedOutput1, expectedOutput2, expectedOutput3, expectedOutput4, expectedOutput5, expectedOutput6, expectedOutput7, expectedOutput8, expectedOutput9, expectedOutput10, expectedOutput11, expectedOutput12, expectedOutput13, expectedOutput14, expectedOutput15, expectedOutput16, expectedOutput17, expectedOutput18, expectedOutput19, expectedOutput20);
 
         //esecuzione test
+        List<List<Object>> reteOutput = new ArrayList<>();
         i = 0;
         for (String currentPattern : queryList) {
             i++;
             long start = System.nanoTime();
-            reteOutput = rete.findMatch(currentPattern, "ID" + i);
+            reteOutput = rete.findMatch(currentPattern);
             long finish = System.nanoTime();
             //System.out.println("DEBUG: " + expectedOutput.get(i));
-            boolean testOk = test.checkOutput(reteOutput, expectedOutput.get(i-1));
+            boolean testOk = test.verifyOutput(reteOutput, expectedOutput.get(i-1));
             if (!testOk) {
                 System.out.println(ANSI_RED + "TEST FAILED (S" + i + "):" + ANSI_RESET);
                 System.out.println("INPUT: " + currentPattern);
@@ -132,11 +132,9 @@ public class Main {
             System.out.println();
         }
 
-        /*
         System.out.println("-----RETE-----");
         rete.printRete();
         System.out.println();
-        */
         
     }
 }
