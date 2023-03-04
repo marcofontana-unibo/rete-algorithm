@@ -168,8 +168,9 @@ public class Rete {
         //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
         List<Object> matchResult = listFlattener(removeDuplicates(out));
 
+        //executeRule(matchResult)
+        
         return matchResult;
-        //return executeRule(matchResult);
     }
 
     //esegue la regola corrispondente al match trovato
