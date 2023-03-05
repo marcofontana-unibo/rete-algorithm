@@ -55,6 +55,9 @@ public class Rete {
     public List<List<Object>> findMatch(String pattern) {
         Object sampleID = tokenization(pattern);
         return checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern));
+
+        //togliendo il commento alla prossima riga posso far restituire al metodo una lita di si liste di stringhe, inveve che oggetti, ma aumenta il tempo che richiede per mettere in uscita l'output
+        //return listTB.changeToListOfListsOfString(checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern)));
     }
 
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.

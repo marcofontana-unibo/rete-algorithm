@@ -94,8 +94,8 @@ public class ToolboxList {
         return out;
     }
 
-    //cambia classe della lista da generico a stringa
-    public List<String> changeToListOfString(List<?> list) {
+    //cambia classe della lista da oggetto a stringa
+    public List<String> changeToListOfString(List<Object> list) {
         List<String> out = new ArrayList<>();
 
         for (Object listElement : list) {
@@ -107,16 +107,20 @@ public class ToolboxList {
 
     //cambia classe della lista di liste da oggetto a stringa
     public List<List<String>> changeToListOfListsOfString(List<List<Object>> list) {
-        List<List<String>> result = new ArrayList<>();
+        List<List<String>> out = new ArrayList<>();
     
-        for (List<Object> innerList : list) {
-            List<String> stringList = new ArrayList<>();
-            for (Object obj : innerList) {
-                stringList.add(obj.toString());
+        for (List<Object> currentList : list) {
+
+            //reset della lista ad ogni iterazione
+            List<String> tmp = new ArrayList<>();
+
+            for (Object currentElement : currentList) {
+                tmp.add(currentElement.toString());
             }
-            result.add(stringList);
+            
+            out.add(tmp);
         }
     
-        return result;
+        return out;
     }
 }
