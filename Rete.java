@@ -54,7 +54,7 @@ public class Rete {
 
     public List<List<Object>> findMatch(String pattern) {
         Object sampleID = tokenization(pattern);
-        return checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern));
+        return queryTB.checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern));
 
         //togliendo il commento alla prossima riga posso far restituire al metodo una lita di si liste di stringhe, inveve che oggetti, ma aumenta il tempo che richiede per mettere in uscita l'output
         //return listTB.changeToListOfListsOfString(checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern)));
@@ -82,7 +82,7 @@ public class Rete {
             if (triples.size() == 1) {
                 for (List<String> currentTriple : triples) {
                     for (AlphaNode alphaNode : alphaNodesFullList) {
-                        newPattern = replaceListVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), currentTriple);
+                        newPattern = queryTB.replaceListVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), currentTriple);
                         out.add(findMatch(queryTB.queryfy(listTB.listToString(newPattern)), sampleID));
                     }
                 }
@@ -90,7 +90,7 @@ public class Rete {
 
                 //se il pattern in ingresso al metodo e' composto da n triple
                 for (AlphaNode alphaNode : alphaNodesFullList) {
-                    updatedPattern = replaceListOfListsVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), triples);
+                    updatedPattern = queryTB.replaceListOfListsVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), triples);
                     out.add(findMatch(queryTB.queryfy(listTB.listOfListsToString(updatedPattern)), sampleID));        
                 }
             }
@@ -205,85 +205,6 @@ public class Rete {
         //TODO: vd. INSTANS
     //    return null;
     //}
-
-    //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
-    private List<Object> replaceListVariablesWithConstants(List<?> listWithConstants, List<String> listWithVariables) {
-        List<Object> out = new ArrayList<>();
-        Map<String, Object> variableMap = new HashMap<>();
-        Map<Object, Object> constantMap = new HashMap<>();
-
-        for (int i = 0; i < listWithConstants.size(); i++) {
-            if (listWithVariables.get(i).startsWith("?") || listWithVariables.get(i).startsWith("$")) {
-                String variableName = listWithVariables.get(i).substring(1);
-                Object constantElement = listWithConstants.get(i);
-                if (!variableMap.containsKey(variableName)) {
-                    variableMap.put(variableName, constantElement);
-                    if (!constantMap.containsKey(constantElement)) {
-                        constantMap.put(constantElement, constantElement);
-                        out.add(variableMap.get(variableName));
-                    }
-                } else {
-                    out.add(constantMap.get(constantElement));
-                }
-            } else {
-                out.add(listWithVariables.get(i));
-            }
-        }
-        return out;
-    }
-
-    //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
-    private List<List<Object>> replaceListOfListsVariablesWithConstants(List<?> listWithConstants, List<List<String>> listWithVariables) {
-        List<List<Object>> out = new ArrayList<>();
-        Map<String, Object> variableMap = new HashMap<>();
-
-        for (List<String> variables : listWithVariables) {
-            List<Object> outElement = new ArrayList<>();
-            
-            for (int i = 0; i < variables.size(); i++) {
-                String variable = variables.get(i);
-                if (variable.startsWith("?") || variable.startsWith("$")) {
-                    if (!variableMap.containsKey(variable)) {
-                        variableMap.put(variable, listWithConstants.get(i));
-                    }
-                    outElement.add(variableMap.get(variable));
-                } else {
-                    outElement.add(variable);
-                }
-            }
-            out.add(outElement);
-        }
-
-        return out;
-    }
-    //controlla che la lista 'listToCheck' abbia le stringhe che non contengono variabili uguali e nelle stesse posizioni di quelle della lista 'inputList'. Se non e' rispettato restituisce una lista vuota, altrimenti restituisce la lista
-    private List<List<Object>> checkOutput(List<List<Object>> listToCheck, List<List<String>> inputList) {
-
-        if (listToCheck.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        int i = -1, j = -1;
-        for (List<Object> currentCheckList : listToCheck) {
-            i++;
-            if (i == inputList.size()) {
-                i = 0;
-            }
-            for (Object currentCheckElement : currentCheckList) {
-                j++;
-                if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("$"))) {
-                    if (!currentCheckElement.toString().equals(inputList.get(i).get(j))) {
-                        //lista vuota
-                        return new ArrayList<>();
-                    }
-                }
-                if (j == 2) {
-                    j = -1;
-                }
-            }
-        }
-        return listToCheck;
-    }
 
     //genera un token unico da usare come ID nella memoria dei nodi
     private int tokenization(String string) {

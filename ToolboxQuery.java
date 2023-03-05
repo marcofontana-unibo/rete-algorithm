@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ToolboxQuery {
 
@@ -71,4 +73,85 @@ public class ToolboxQuery {
         }
         return out.toString();
     }
+
+    //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
+    public List<Object> replaceListVariablesWithConstants(List<?> listWithConstants, List<String> listWithVariables) {
+        List<Object> out = new ArrayList<>();
+        Map<String, Object> variableMap = new HashMap<>();
+        Map<Object, Object> constantMap = new HashMap<>();
+
+        for (int i = 0; i < listWithConstants.size(); i++) {
+            if (listWithVariables.get(i).startsWith("?") || listWithVariables.get(i).startsWith("$")) {
+                String variableName = listWithVariables.get(i).substring(1);
+                Object constantElement = listWithConstants.get(i);
+                if (!variableMap.containsKey(variableName)) {
+                    variableMap.put(variableName, constantElement);
+                    if (!constantMap.containsKey(constantElement)) {
+                        constantMap.put(constantElement, constantElement);
+                        out.add(variableMap.get(variableName));
+                    }
+                } else {
+                    out.add(constantMap.get(constantElement));
+                }
+            } else {
+                out.add(listWithVariables.get(i));
+            }
+        }
+        return out;
+    }
+
+    //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
+    public List<List<Object>> replaceListOfListsVariablesWithConstants(List<?> listWithConstants, List<List<String>> listWithVariables) {
+        List<List<Object>> out = new ArrayList<>();
+        Map<String, Object> variableMap = new HashMap<>();
+
+        for (List<String> variables : listWithVariables) {
+            List<Object> outElement = new ArrayList<>();
+            
+            for (int i = 0; i < variables.size(); i++) {
+                String variable = variables.get(i);
+                if (variable.startsWith("?") || variable.startsWith("$")) {
+                    if (!variableMap.containsKey(variable)) {
+                        variableMap.put(variable, listWithConstants.get(i));
+                    }
+                    outElement.add(variableMap.get(variable));
+                } else {
+                    outElement.add(variable);
+                }
+            }
+            out.add(outElement);
+        }
+
+        return out;
+    }
+
+    //controlla che la lista 'listToCheck' abbia le stringhe che non contengono variabili uguali e nelle stesse posizioni di quelle della lista 'inputList'. Se non e' rispettato restituisce una lista vuota, altrimenti restituisce la lista
+    public List<List<Object>> checkOutput(List<List<Object>> listToCheck, List<List<String>> inputList) {
+
+        if (listToCheck.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        int i = -1, j = -1;
+        for (List<Object> currentCheckList : listToCheck) {
+            i++;
+            if (i == inputList.size()) {
+                i = 0;
+            }
+            for (Object currentCheckElement : currentCheckList) {
+                j++;
+                if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("$"))) {
+                    if (!currentCheckElement.toString().equals(inputList.get(i).get(j))) {
+                        //lista vuota
+                        return new ArrayList<>();
+                    }
+                }
+                if (j == 2) {
+                    j = -1;
+                }
+            }
+        }
+        return listToCheck;
+    }
+
 }
