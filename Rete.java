@@ -10,7 +10,10 @@ public class Rete {
     private List<AlphaNode> alphaNodesFullList;     //lista che contiene tutti i nodi alpha della rete
     private List<BetaNode> betaNodesFullList;       //lista che contiene tutti i nodi beta della rete
     private List<Integer> alphaNodesToSkip;         //lista in cui vengono salvati gli indici dei nodi alpha da evitare durante la ricerca del pattern, in modo da ottimizzare
-    private Map<String, Integer> tokenMap;           
+    private Map<String, Integer> tokenMap;          //mappa per sampleID
+    private ToolboxList listTB;                     //metodi per la modifica di liste
+    //private ToolboxString stringTB;               //metodi per la modifica di stringhe
+    private ToolboxQuery queryTB;                   //metodi per la modifica di query
 
 
     //costruttore
@@ -19,6 +22,10 @@ public class Rete {
         this.betaNodesFullList = new ArrayList<>();
         this.tokenMap = new HashMap<>();
         this.alphaNodesToSkip = new ArrayList<>();
+        this.listTB = new ToolboxList();
+        //this.stringTB = new ToolboxString();
+        this.queryTB = new ToolboxQuery();
+    
     }
 
     //genera / rimuove nodi alpha. Se addTriple == true, allora crea i nodi, se addTriple == false, li elimina 
@@ -47,7 +54,7 @@ public class Rete {
 
     public List<List<Object>> findMatch(String pattern) {
         Object sampleID = tokenization(pattern);
-        return checkOutput(listToListOfLists(findMatch(pattern, sampleID), 3), queryToList(pattern));
+        return checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern));
     }
 
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.
@@ -61,27 +68,27 @@ public class Rete {
         //System.out.println("INPUT: " + pattern);
 
         //separa soggetto predicato oggetto dalla stringa e le inserisce in una lista
-        List<List<String>> triples = queryToList(pattern);
+        List<List<String>> triples = queryTB.queryToList(pattern);
 
         //System.out.println("TRIPLE: " + triples);
 
         //CASO 1: caso in cui in ingresso ci sia una query con delle variabili
-        if (containsVariable(triples)) {
+        if (queryTB.containsVariable(triples)) {
 
             //se il pattern in ingresso al metodo e' composto da una singola tripla
             if (triples.size() == 1) {
                 for (List<String> currentTriple : triples) {
                     for (AlphaNode alphaNode : alphaNodesFullList) {
-                        newPattern = replaceListVariablesWithConstants(listFlattener(alphaNode.getValue()), currentTriple);
-                        out.add(findMatch(queryfy(listToString(newPattern)), sampleID));
+                        newPattern = replaceListVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), currentTriple);
+                        out.add(findMatch(queryTB.queryfy(listTB.listToString(newPattern)), sampleID));
                     }
                 }
             } else {
 
                 //se il pattern in ingresso al metodo e' composto da n triple
                 for (AlphaNode alphaNode : alphaNodesFullList) {
-                    updatedPattern = replaceListOfListsVariablesWithConstants(listFlattener(alphaNode.getValue()), triples);
-                    out.add(findMatch(queryfy(listOfListsToString(updatedPattern)), sampleID));        
+                    updatedPattern = replaceListOfListsVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), triples);
+                    out.add(findMatch(queryTB.queryfy(listTB.listOfListsToString(updatedPattern)), sampleID));        
                 }
             }
         } else {
@@ -101,7 +108,7 @@ public class Rete {
                         if(alphaNode.getValue().size() == triples.size()) {
                             alphaOutputList.add(alphaNode.getValue());
 
-                            return listFlattener(alphaOutputList);
+                            return listTB.listFlattener(alphaOutputList);
                         }
                     }
                 }
@@ -138,7 +145,7 @@ public class Rete {
                     found++;
 
                     //se e' arrivato al termine di questo ramo della rete restituisce il pattern trovato
-                    if ((listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
+                    if ((listTB.listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
                         //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                         betaOutputList.addAll(betaNode.getParent1().getValue());
                         betaOutputList.addAll(betaNode.getParent2().getValue());
@@ -146,7 +153,7 @@ public class Rete {
                         //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
                         deleteNodesMemory(sampleID.toString());
 
-                        return listFlattener(betaOutputList);
+                        return listTB.listFlattener(betaOutputList);
                     }
 
                 //cerca il terzo o oltre
@@ -167,7 +174,7 @@ public class Rete {
                     found++;
 
                     //verifica che sia arrivato al termine di questo ramo della rete
-                    if ((listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
+                    if ((listTB.listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
                         //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                         betaOutputList.addAll(betaNode.getParent1().getValue());
                         betaOutputList.addAll(betaNode.getParent2().getValue());
@@ -175,7 +182,7 @@ public class Rete {
                         //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
                         deleteNodesMemory(sampleID.toString());
 
-                        return listFlattener(betaOutputList);
+                        return listTB.listFlattener(betaOutputList);
                     }
                 }
             }
@@ -185,7 +192,7 @@ public class Rete {
         alphaNodesToSkip.clear();
 
         //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
-        List<Object> matchResult = listFlattener(removeDoubles(out));
+        List<Object> matchResult = listTB.listFlattener(listTB.removeDoubles(out));
         
         return matchResult;
     }
@@ -196,117 +203,14 @@ public class Rete {
     //    return null;
     //}
 
-    //data una stringa che rappresenta una query mette in uscita una lista dove ogni elemento e' composto da soggetto predicato e oggetto
-    private List<List<String>> queryToList(String string) {
-        List<String> fullList = Arrays.asList(string.split("\\s+"));
-        List<List<String>> out = new ArrayList<>();
-        int found = 0;
-
-        //conta le occorrenze di ";" all'interno della stringa (vd. prossime righe)
-        for (String currentString : fullList) {
-            if (currentString.matches(";")) {
-                found++;
-            }
-        }
-
-        //se la query e' del tipo "a b c ; d e f ; ..."
-        if (((found*4)+4) == fullList.size()+1) {
-            for (int i = 1; i < fullList.size()+2; i++) {
-                if (i%4 == 0) {
-                    out.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
-                }
-            }
-        } else {
-        //se la query e' del tipo "a b c ; d e ; ... "
-            for (int i = 1; i < fullList.size()+2; i++) {
-                if ((i-1) % 3 == 0 && ((i-1) != 0)) {
-                    if ((i-1) >= 6) {
-                        out.add(Arrays.asList(fullList.get(0), fullList.get(i-3), fullList.get(i-2)));
-                    } else {
-                        out.add(Arrays.asList(fullList.get(i-4), fullList.get(i-3), fullList.get(i-2)));
-                    }
-                }
-            }
-        }
-        return out;
-    }
-    
-    //riscrive la stringa passata in input come una query
-    private String queryfy(String input) {
-        String[] words = input.split("\\s+");
-        StringBuilder output = new StringBuilder();
-        
-        for (int i = 0; i < words.length; i++) {
-            output.append(words[i]);
-            if ((i + 1) % 3 == 0 && i != words.length - 1) {
-                output.append(" ; ");
-            } else {
-                output.append(" ");
-            }
-        }
-        return output.toString();
-    }
-
-    //converte una lista in una stringa
-    private String listToString(List<?> list) {
-        String out = new String();
-        for (int i = 0; i < list.size(); i++) {
-            if (i == 0) {
-                out += list.get(i);
-            } else {
-                out += " " + list.get(i);
-            }
-        }
-        return out;
-    }
-
-    //converte una lista in una lista di liste dove ogni elemento sono 'num' elementi della lista di partenza
-    private List<List<Object>> listToListOfLists(List<Object> list, int num) {
-        if (num <= 0) {
-            throw new IllegalArgumentException("num must be > 0");
-        }
-
-        List<List<Object>> result = new ArrayList<>();
-        List<Object> tmpList = new ArrayList<>();
-        
-        for (int i = 0; i < list.size(); i++) {
-            tmpList.add(list.get(i));
-            if (tmpList.size() == num) {
-                result.add(tmpList);
-                tmpList = new ArrayList<>();
-            }
-        }
-        if (!tmpList.isEmpty()) {
-            result.add(tmpList);
-        }
-        return result;
-    }
-    
-
-    //converte una lista di liste in una stringa
-    private String listOfListsToString(List<List<Object>> list) {
-        StringBuilder out = new StringBuilder();
-        for (List<?> sublist : list) {
-            for (int i = 0; i < sublist.size(); i++) {
-                if (i == 0) {
-                    out.append(sublist.get(i));
-                } else {
-                    out.append(" ").append(sublist.get(i));
-                }
-            }
-            out.append(" ");
-        }
-        return out.toString().trim();
-    }
-
     //sostituisce le variabili di listWithVariables con le costanti di listWithConstants, mette in uscita la lista che aveva variabili sostituite con costanti (per effettuare la ricorsione del metodo 'findMatch' con solo costanti)
     private List<Object> replaceListVariablesWithConstants(List<?> listWithConstants, List<String> listWithVariables) {
         List<Object> out = new ArrayList<>();
         Map<String, Object> variableMap = new HashMap<>();
         Map<Object, Object> constantMap = new HashMap<>();
-    
+
         for (int i = 0; i < listWithConstants.size(); i++) {
-            if (isVariable(listWithVariables.get(i))) {
+            if (listWithVariables.get(i).startsWith("?") || listWithVariables.get(i).startsWith("$")) {
                 String variableName = listWithVariables.get(i).substring(1);
                 Object constantElement = listWithConstants.get(i);
                 if (!variableMap.containsKey(variableName)) {
@@ -329,7 +233,7 @@ public class Rete {
     private List<List<Object>> replaceListOfListsVariablesWithConstants(List<?> listWithConstants, List<List<String>> listWithVariables) {
         List<List<Object>> out = new ArrayList<>();
         Map<String, Object> variableMap = new HashMap<>();
-    
+
         for (List<String> variables : listWithVariables) {
             List<Object> outElement = new ArrayList<>();
             
@@ -346,24 +250,9 @@ public class Rete {
             }
             out.add(outElement);
         }
-    
-        return out;
-    }
-    
-    //mette in uscita una lista che contiene solamente elementi che appaiono una unica volta nella lista in ingresso
-    private List<Object> removeDoubles(List<Object> list) {
-        List<Object> out = new ArrayList<>();
-
-        //aggiunge alla lista di uscita elementi non gia' inseriti prima
-        for (Object element : list) {
-            if (!out.contains(element)) {
-                out.add(element);
-            }
-        }
 
         return out;
     }
-
     //controlla che la lista 'listToCheck' abbia le stringhe che non contengono variabili uguali e nelle stesse posizioni di quelle della lista 'inputList'. Se non e' rispettato restituisce una lista vuota, altrimenti restituisce la lista
     private List<List<Object>> checkOutput(List<List<Object>> listToCheck, List<List<String>> inputList) {
 
@@ -391,23 +280,6 @@ public class Rete {
             }
         }
         return listToCheck;
-    }
-
-    //restituisce true se la stringa in ingresso e' una variabile
-    private boolean isVariable(String string) {
-        return string.startsWith("?") || string.startsWith("$");
-    }
-
-    //come il metodo 'isVariable', ma controlla stringhe all'interno di liste di liste
-    private boolean containsVariable(List<List<String>> list) {
-        for (List<String> sublist : list) {
-            for (String string : sublist) {
-                if ((string.startsWith("?") || string.startsWith("$"))) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     //genera un token unico da usare come ID nella memoria dei nodi
@@ -459,20 +331,6 @@ public class Rete {
         for (BetaNode betaNode : betaNodesFullList) {
             betaNode.deleteMemory(sampleID);
         }
-    }
-
-    //data una lista di liste restituisce una singola lista
-    private List<Object> listFlattener(List<?> list) {
-        List<Object> flattenedList = new ArrayList<>();
-    
-        for (Object listElement : list) {
-            if (listElement instanceof List) {
-                flattenedList.addAll(listFlattener((List<?>) listElement));
-            } else {
-                flattenedList.add(listElement.toString());
-            }
-        }
-        return flattenedList;
     }
 
     //stampa a video i nodi della rete

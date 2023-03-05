@@ -119,7 +119,7 @@ public class Main {
             reteOutput = rete.findMatch(currentPattern);
             long finish = System.nanoTime();
             //System.out.println("DEBUG: " + expectedOutput.get(i));
-            boolean testOk = test.verifyOutput(reteOutput, expectedOutput.get(i-1));
+            boolean testOk = test.testOutput(reteOutput, expectedOutput.get(i-1));
             if (!testOk) {
                 System.out.println(ANSI_RED + "TEST FAILED (S" + i + "):" + ANSI_RESET);
                 System.out.println("INPUT: " + currentPattern);
