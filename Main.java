@@ -7,7 +7,7 @@ public class Main {
         //colori usati per vedere piu' facilmente se i test sono ok o falliti
         final String ANSI_RED = "\u001B[31m";       //colora l'output del terminale di rosso
         final String ANSI_GREEN = "\u001B[32m";     //colora l'output del terminale di verde
-        final String ANSI_CYAN = "\u001B[36m";     //colora l'output del terminale di azzurro
+        final String ANSI_CYAN = "\u001B[36m";      //colora l'output del terminale di azzurro
         final String ANSI_RESET = "\u001B[0m";      //resetta il colore dell'output
     
         Rete rete = new Rete();
@@ -133,15 +133,19 @@ public class Main {
                 //System.out.println("EXCPTD: " + expectedOutput.get(i-1));
                 numOk++;
             }
-            System.out.println("TIME: " + (finish - start)*Math.pow(10, -6)+"ms");
+            System.out.println("TIME: " + Math.round((finish - start)*Math.pow(10, -6))+"ms");
+            //togliere commento alla prossima riga per valore preciso
+            //System.out.println("TIME: " + (finish - start)*Math.pow(10, -6)+"ms");
             System.out.println();
         }
         System.out.println(ANSI_CYAN + "RESULT: " + numOk + "/" + (numOk + numFailed) + ANSI_RESET);
         System.out.println();
 
+        /*
         System.out.println("-----RETE-----");
         rete.printRete();
         System.out.println();
+        */
         
     }
 }

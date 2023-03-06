@@ -1,6 +1,5 @@
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,12 +8,9 @@ public class Rete {
     //campi
     private List<AlphaNode> alphaNodesFullList;     //lista che contiene tutti i nodi alpha della rete
     private List<BetaNode> betaNodesFullList;       //lista che contiene tutti i nodi beta della rete
-    private List<Integer> alphaNodesToSkip;         //lista in cui vengono salvati gli indici dei nodi alpha da evitare durante la ricerca del pattern, in modo da ottimizzare
+    private List<Integer> alphaNodesToSkip;         //lista in cui vengono salvati gli indici dei nodi alpha da evitare durante la ricerca del pattern
     private Map<String, Integer> tokenMap;          //mappa per sampleID
-    private ToolboxList listTB;                     //metodi per la modifica di liste
-    //private ToolboxString stringTB;               //metodi per la modifica di stringhe
-    private ToolboxQuery queryTB;                   //metodi per la modifica di query
-
+    private Toolbox tb;                             //metodi generali di modifica liste, stringhe e query
 
     //costruttore
     public Rete() {
@@ -22,15 +18,13 @@ public class Rete {
         this.betaNodesFullList = new ArrayList<>();
         this.tokenMap = new HashMap<>();
         this.alphaNodesToSkip = new ArrayList<>();
-        this.listTB = new ToolboxList();
-        //this.stringTB = new ToolboxString();
-        this.queryTB = new ToolboxQuery();
+        this.tb = new Toolbox();
     
     }
 
     //genera / rimuove nodi alpha. Se addTriple == true, allora crea i nodi, se addTriple == false, li elimina 
     public void updateRete(List<String> triple, boolean addTriple) {
-
+        
         //rimuove nodi alpha
         if (!addTriple) {
 
@@ -50,14 +44,16 @@ public class Rete {
                 alphaNodesFullList.add(alphaNode);
             }
         }
+
+        //findMatch(triple.toString());
     }
 
     public List<List<Object>> findMatch(String pattern) {
-        Object sampleID = tokenization(pattern);
-        return queryTB.checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern));
+        Object sampleID = tb.tokenization(pattern, tokenMap);
+        return tb.ver(tb.listToListOfLists(findMatch(pattern, sampleID), 3), tb.queryToList(pattern));
 
-        //togliendo il commento alla prossima riga posso far restituire al metodo una lita di si liste di stringhe, inveve che oggetti, ma aumenta il tempo che richiede per mettere in uscita l'output
-        //return listTB.changeToListOfListsOfString(checkOutput(listTB.listToListOfLists(findMatch(pattern, sampleID), 3), queryTB.queryToList(pattern)));
+        //togliendo il commento alla prossima riga posso far restituire al metodo una lita di liste di stringhe, inveve che oggetti, ma aumenta il tempo che richiede per mettere in uscita l'output
+        //return tb.changeToListOfListsOfString(tb.ver(tb.listToListOfLists(findMatch(pattern, sampleID), 3), tb.queryToList(pattern)));
     }
 
     //Cerca uno o piu' pattern all'interno della rete, se trovati li mette in output.
@@ -71,27 +67,27 @@ public class Rete {
         //System.out.println("INPUT: " + pattern);
 
         //separa soggetto predicato oggetto dalla stringa e le inserisce in una lista
-        List<List<String>> triples = queryTB.queryToList(pattern);
+        List<List<String>> triples = tb.queryToList(pattern);
 
         //System.out.println("TRIPLE: " + triples);
 
         //CASO 1: caso in cui in ingresso ci sia una query con delle variabili
-        if (queryTB.containsVariable(triples)) {
+        if (tb.containsVariable(triples)) {
 
             //se il pattern in ingresso al metodo e' composto da una singola tripla
             if (triples.size() == 1) {
                 for (List<String> currentTriple : triples) {
                     for (AlphaNode alphaNode : alphaNodesFullList) {
-                        newPattern = queryTB.replaceListVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), currentTriple);
-                        out.add(findMatch(queryTB.queryfy(listTB.listToString(newPattern)), sampleID));
+                        newPattern = tb.replaceListVariablesWithConstants(tb.listFlattener(alphaNode.getValue()), currentTriple);
+                        out.add(findMatch(tb.queryfy(tb.listToString(newPattern)), sampleID));
                     }
                 }
             } else {
 
                 //se il pattern in ingresso al metodo e' composto da n triple
                 for (AlphaNode alphaNode : alphaNodesFullList) {
-                    updatedPattern = queryTB.replaceListOfListsVariablesWithConstants(listTB.listFlattener(alphaNode.getValue()), triples);
-                    out.add(findMatch(queryTB.queryfy(listTB.listOfListsToString(updatedPattern)), sampleID));        
+                    updatedPattern = tb.replaceListOfListsVariablesWithConstants(tb.listFlattener(alphaNode.getValue()), triples);
+                    out.add(findMatch(tb.queryfy(tb.listOfListsToString(updatedPattern)), sampleID));        
                 }
             }
         } else {
@@ -111,7 +107,7 @@ public class Rete {
                         if(alphaNode.getValue().size() == triples.size()) {
                             alphaOutputList.add(alphaNode.getValue());
 
-                            return listTB.listFlattener(alphaOutputList);
+                            return tb.listFlattener(alphaOutputList);
                         }
                     }
                 }
@@ -148,7 +144,7 @@ public class Rete {
                     found++;
 
                     //se e' arrivato al termine di questo ramo della rete restituisce il pattern trovato
-                    if ((listTB.listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
+                    if ((tb.listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
                         //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                         betaOutputList.addAll(betaNode.getParent1().getValue());
                         betaOutputList.addAll(betaNode.getParent2().getValue());
@@ -156,7 +152,7 @@ public class Rete {
                         //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
                         deleteNodesMemory(sampleID.toString());
 
-                        return listTB.listFlattener(betaOutputList);
+                        return tb.listFlattener(betaOutputList);
                     }
 
                 //cerca il terzo o oltre
@@ -177,7 +173,7 @@ public class Rete {
                     found++;
 
                     //verifica che sia arrivato al termine di questo ramo della rete
-                    if ((listTB.listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
+                    if ((tb.listFlattener(betaNode.getValue()).size() == triples.size()*3)) {
                         //mette in uscita una sola lista data dalla fusione delle due liste di valori dei nodi padre
                         betaOutputList.addAll(betaNode.getParent1().getValue());
                         betaOutputList.addAll(betaNode.getParent2().getValue());
@@ -185,7 +181,7 @@ public class Rete {
                         //se arriva qui, ha trovato un match quindi si puo' eliminare la memoria dai nodi
                         deleteNodesMemory(sampleID.toString());
 
-                        return listTB.listFlattener(betaOutputList);
+                        return tb.listFlattener(betaOutputList);
                     }
                 }
             }
@@ -195,7 +191,7 @@ public class Rete {
         alphaNodesToSkip.clear();
 
         //inserisce nella variabile 'matchResult' tutti i risultati prodotti dalla ricerca all'interno di rete
-        List<Object> matchResult = listTB.listFlattener(listTB.removeDoubles(out));
+        List<Object> matchResult = tb.listFlattener(tb.removeDoubles(out));
         
         return matchResult;
     }
@@ -205,26 +201,6 @@ public class Rete {
         //TODO: vd. INSTANS
     //    return null;
     //}
-
-    //genera un token unico da usare come ID nella memoria dei nodi
-    private int tokenization(String string) {
-        Random random = new Random();
-        int token = 0;
-
-        if (this.tokenMap.containsKey(string)) {
-            return this.tokenMap.get(string);
-
-        } else {
-
-            do {
-                token = random.nextInt(10_000_000);
-            } while (tokenMap.containsValue(token));
-
-            this.tokenMap.put(string, token);
-        }
-        //System.out.println(this.tokenMap);
-        return this.tokenMap.get(string);
-    }
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null
     private AlphaNode findAlphaValue(Object value) {
@@ -258,7 +234,7 @@ public class Rete {
     }
 
     //stampa a video i nodi della rete
-    public void printRete() {
+    public void printRete() { 
         System.out.println("alphaNodes: " + this.alphaNodesFullList.size());
         for (AlphaNode alphaNode : alphaNodesFullList) {
             System.out.print(" Value:" + alphaNode.getValue().toString());
@@ -273,14 +249,6 @@ public class Rete {
     }
 
     //selettori
-    public int getNumAlphaNodes() {
-        return this.alphaNodesFullList.size();
-    }
-
-    public int getNumBetaNodes() {
-        return this.betaNodesFullList.size();
-    }
-
     public List<AlphaNode> getAlphaNodesList() {
         return this.alphaNodesFullList;
     }
