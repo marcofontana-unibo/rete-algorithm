@@ -149,7 +149,7 @@ public class Toolbox {
 
         //conta le occorrenze di ";" all'interno della stringa (vd. prossime righe)
         for (String currentString : fullList) {
-            if (currentString.matches(";")) {
+            if (currentString.matches(";") || currentString.matches(".")) {
                 found++;
             }
         }
@@ -173,6 +173,7 @@ public class Toolbox {
                 }
             }
         }
+
         return out;
     }
     
@@ -243,25 +244,53 @@ public class Toolbox {
         return out;
     }
 
-    //controlla che la lista 'listToCheck' abbia le stringhe che non contengono variabili uguali e nelle stesse posizioni di quelle della lista 'inputList'. Se non e' rispettato restituisce una lista vuota, altrimenti restituisce la lista
-    public List<List<Object>> ver(List<List<Object>> listToCheck, List<List<String>> inputList) {
+    //EXTRA: restituisce solo variabili (var) --> cambiare return type in hashmap
+    public Map<String, List<Object>> var(List<List<Object>> outputList, List<List<String>> inputList) {
+        Map<String, List<Object>> out = new HashMap<>();
+        boolean onlyConstants = true;
 
-        if (listToCheck.isEmpty()) {
-            return new ArrayList<>();
+        if (outputList.isEmpty()) {
+            return new HashMap<>();
         }
 
+        
+        if (containsVariable(inputList)) {
+            onlyConstants = false;
+        }
+        
+
         int i = -1, j = -1;
-        for (List<Object> currentCheckList : listToCheck) {
+        for (List<Object> currentOutputList : outputList) {
             i++;
             if (i == inputList.size()) {
                 i = 0;
             }
-            for (Object currentCheckElement : currentCheckList) {
+            for (Object currentOutputElement : currentOutputList) {
                 j++;
                 if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("$"))) {
-                    if (!currentCheckElement.toString().equals(inputList.get(i).get(j))) {
+                    if (!currentOutputElement.toString().equals(inputList.get(i).get(j))) {
                         //lista vuota
-                        return new ArrayList<>();
+                        return new HashMap<>();
+                    } else if (onlyConstants) {
+                        String constantName = inputList.get(i).get(j);
+                        if (out.containsKey("c" + j)) {
+                            List<Object> list = out.get("c" + j);
+                            list.add(constantName);
+                        } else {
+                            List<Object> newList = new ArrayList<>();
+                            newList.add(constantName);
+                            out.put("c" + j, newList);
+                        }
+                    }
+                } else {
+                    String variableName = inputList.get(i).get(j).substring(1);
+                    if (out.containsKey(variableName)) {
+                        List<Object> list = out.get(variableName);
+                        list.add(currentOutputElement);
+                    } else {
+                        List<Object> newList = new ArrayList<>();
+                        newList.add(currentOutputElement);
+                        out.put(variableName, newList);
                     }
                 }
                 if (j == 2) {
@@ -269,7 +298,8 @@ public class Toolbox {
                 }
             }
         }
-        return listToCheck;
+
+        return out;
     }
 
     /* METODI PER MODIFICARE STRINGHE */

@@ -48,9 +48,9 @@ public class Rete {
         //findMatch(triple.toString());
     }
 
-    public List<List<Object>> findMatch(String pattern) {
+    public Map<String, List<Object>> findMatch(String pattern) {
         Object sampleID = tb.tokenization(pattern, tokenMap);
-        return tb.ver(tb.listToListOfLists(findMatch(pattern, sampleID), 3), tb.queryToList(pattern));
+        return tb.var(tb.listToListOfLists(findMatch(pattern, sampleID), 3), tb.queryToList(pattern));
 
         //togliendo il commento alla prossima riga posso far restituire al metodo una lita di liste di stringhe, inveve che oggetti, ma aumenta il tempo che richiede per mettere in uscita l'output
         //return tb.changeToListOfListsOfString(tb.ver(tb.listToListOfLists(findMatch(pattern, sampleID), 3), tb.queryToList(pattern)));
