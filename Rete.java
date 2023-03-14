@@ -44,8 +44,6 @@ public class Rete {
                 alphaNodesFullList.add(alphaNode);
             }
         }
-
-        //findMatch(triple.toString());
     }
 
     public Map<String, List<Object>> findMatch(String pattern) {
@@ -195,12 +193,6 @@ public class Rete {
         
         return matchResult;
     }
-
-    //esegue la regola corrispondente al match trovato
-    //private List<Object> executeRule(List<Object> matchResult) {
-        //TODO: vd. INSTANS
-    //    return null;
-    //}
 
     //restituisce il nodo che contiene il lhs specificato. Altrimenti restituisce null
     private AlphaNode findAlphaValue(Object value) {

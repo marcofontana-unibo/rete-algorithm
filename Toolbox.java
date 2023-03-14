@@ -244,20 +244,13 @@ public class Toolbox {
         return out;
     }
 
-    //EXTRA: restituisce solo variabili (var) --> cambiare return type in hashmap
+    //mette in uscita solo solo variabili come una hashmap (key = nomeVar, value = lista di tutti i valori che può assumere)
     public Map<String, List<Object>> var(List<List<Object>> outputList, List<List<String>> inputList) {
         Map<String, List<Object>> out = new HashMap<>();
-        boolean onlyConstants = true;
 
         if (outputList.isEmpty()) {
             return new HashMap<>();
-        }
-
-        
-        if (containsVariable(inputList)) {
-            onlyConstants = false;
-        }
-        
+        }        
 
         int i = -1, j = -1;
         for (List<Object> currentOutputList : outputList) {
@@ -269,18 +262,7 @@ public class Toolbox {
                 j++;
                 if (!(inputList.get(i).get(j).startsWith("?") || inputList.get(i).get(j).startsWith("$"))) {
                     if (!currentOutputElement.toString().equals(inputList.get(i).get(j))) {
-                        //lista vuota
                         return new HashMap<>();
-                    } else if (onlyConstants) {
-                        String constantName = inputList.get(i).get(j);
-                        if (out.containsKey("c" + j)) {
-                            List<Object> list = out.get("c" + j);
-                            list.add(constantName);
-                        } else {
-                            List<Object> newList = new ArrayList<>();
-                            newList.add(constantName);
-                            out.put("c" + j, newList);
-                        }
                     }
                 } else {
                     String variableName = inputList.get(i).get(j).substring(1);
